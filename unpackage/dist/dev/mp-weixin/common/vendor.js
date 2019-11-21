@@ -7602,9 +7602,9 @@ module.exports = g;
 /***/ }),
 
 /***/ 36:
-/*!*****************************************************!*\
-  !*** E:/tally/tall/components/uni-calendar/util.js ***!
-  \*****************************************************/
+/*!***********************************************!*\
+  !*** E:/tall/components/uni-calendar/util.js ***!
+  \***********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -7940,9 +7940,9 @@ Calendar;exports.default = _default;
 /***/ }),
 
 /***/ 37:
-/*!*********************************************************!*\
-  !*** E:/tally/tall/components/uni-calendar/calendar.js ***!
-  \*********************************************************/
+/*!***************************************************!*\
+  !*** E:/tall/components/uni-calendar/calendar.js ***!
+  \***************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -8497,9 +8497,9 @@ calendar;exports.default = _default;
 /***/ }),
 
 /***/ 4:
-/*!********************************!*\
-  !*** E:/tally/tall/pages.json ***!
-  \********************************/
+/*!**************************!*\
+  !*** E:/tall/pages.json ***!
+  \**************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9407,9 +9407,9 @@ module.exports = {"_from":"@dcloudio/uni-stat@next","_id":"@dcloudio/uni-stat@2.
 /***/ }),
 
 /***/ 7:
-/*!*************************************************!*\
-  !*** E:/tally/tall/pages.json?{"type":"style"} ***!
-  \*************************************************/
+/*!*******************************************!*\
+  !*** E:/tall/pages.json?{"type":"style"} ***!
+  \*******************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9419,9 +9419,9 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 /***/ }),
 
 /***/ 8:
-/*!************************************************!*\
-  !*** E:/tally/tall/pages.json?{"type":"stat"} ***!
-  \************************************************/
+/*!******************************************!*\
+  !*** E:/tall/pages.json?{"type":"stat"} ***!
+  \******************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
