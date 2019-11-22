@@ -31,5 +31,46 @@
         text-align: left;
         margin-left: 10rpx;
 }
-    
+.todayView {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        width: 700rpx;
+        margin: 20rpx 0;
+        height: 60rpx;
+        background: #F7F7F7;
+}
+.todayView-v {
+        width: 45%;
+        text-align: left;
+        margin-left: 0rpx;
+}
+.formBox {
+        background: #fff;
+        width: 600rpx;
+        /* height: 700rpx; */
+        border-radius: 36rpx;
+        padding: 20rpx;
+}
+.formView {
+        margin: 10rpx 0;
+        /* border: */
+}
+.formView-t {
+        margin-bottom: 10rpx;
+}
+.formBrn {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-justify-content: space-around;
+            -ms-flex-pack: distribute;
+                justify-content: space-around;
+        margin: 20rpx;
+}
+.brn {
+        width: 45%;
+}
 

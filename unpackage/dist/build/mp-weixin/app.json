@@ -12,9 +12,9 @@
   },
   "permission": {
     "scope.userLocation": {
-      "desc": ""
+      "desc": "wxd429ff31dddefdc6"
     }
   },
   "usingComponents": {},
-  "sitemapLocation": "sitemap36.json"
+  "sitemapLocation": "sitemap.json"
 }

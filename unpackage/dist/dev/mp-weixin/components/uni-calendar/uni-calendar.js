@@ -178,7 +178,7 @@ var _util = _interopRequireDefault(__webpack_require__(/*! ./util.js */ 36));fun
 //
 //
 //
-var uniCalendarItem = function uniCalendarItem() {return __webpack_require__.e(/*! import() | components/uni-calendar/uni-calendar-item */ "components/uni-calendar/uni-calendar-item").then(__webpack_require__.bind(null, /*! ./uni-calendar-item.vue */ 40));};var _default2 = { components: { uniCalendarItem: uniCalendarItem }, props: { /**
+var uniCalendarItem = function uniCalendarItem() {return __webpack_require__.e(/*! import() | components/uni-calendar/uni-calendar-item */ "components/uni-calendar/uni-calendar-item").then(__webpack_require__.bind(null, /*! ./uni-calendar-item.vue */ 47));};var _default2 = { components: { uniCalendarItem: uniCalendarItem }, props: { /**
                                                                                                                                                                                                                                              * 当前日期
                                                                                                                                                                                                                                              */date: { type: String, default: '' }, /**
                                                                                                                                                                                                                                                                                      * 打点日期

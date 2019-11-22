@@ -39,7 +39,7 @@
 			"list": [
 				{
 					"id": -1,
-					"name": "pages/index/index",
+					"name": "pages/accounts/index",
 					"pathName": "pages/accounts/index",
 					"scene": null
 				}

@@ -122,7 +122,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var uniCalendar = function uniCalendar() {return Promise.all(/*! import() | components/uni-calendar/uni-calendar */[__webpack_require__.e("common/vendor"), __webpack_require__.e("components/uni-calendar/uni-calendar")]).then(__webpack_require__.bind(null, /*! @/components/uni-calendar/uni-calendar */ 31));};var uniPopup = function uniPopup() {return __webpack_require__.e(/*! import() | components/uni-popup/uni-popup */ "components/uni-popup/uni-popup").then(__webpack_require__.bind(null, /*! @/components/uni-popup/uni-popup.vue */ 52));};var _default =
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var uniCalendar = function uniCalendar() {return Promise.all(/*! import() | components/uni-calendar/uni-calendar */[__webpack_require__.e("common/vendor"), __webpack_require__.e("components/uni-calendar/uni-calendar")]).then(__webpack_require__.bind(null, /*! @/components/uni-calendar/uni-calendar */ 31));};var uniPopup = function uniPopup() {return __webpack_require__.e(/*! import() | components/uni-popup/uni-popup */ "components/uni-popup/uni-popup").then(__webpack_require__.bind(null, /*! @/components/uni-popup/uni-popup.vue */ 40));};
 
 
 
@@ -203,6 +203,17 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
 
 
+
+
+
+
+
+
+
+
+
+
+var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/graceChecker.js */ 68);var _default =
 {
   components: {
     uniCalendar: uniCalendar,
@@ -264,7 +275,20 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
     },
     // 表单确认
     formSubmit: function formSubmit(e) {
+      var rule = [
+      { name: "picker", checkType: "notnull", checkRule: "", errorMsg: "请选择日期" },
+      { name: "radio", checkType: "in", checkRule: "radio1,radio2", errorMsg: "请选择方式" },
+      { name: "input", checkType: "therge", errorMsg: "请输入金额" }];
+
+      console.log(e, 'eeee');
       console.log(e.detail.value, 'ee');
+      var formData = e.detail.value;
+      var checkRes = graceChecker.check(formData, rule);
+      if (checkRes) {
+        uni.showToast({ title: "验证通过!", icon: "none" });
+      } else {
+        uni.showToast({ title: graceChecker.error, icon: "none" });
+      }
     },
     // 表单取消
     formReset: function formReset(e) {
@@ -285,6 +309,7 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
       day = day > 9 ? day : '0' + day;
       return "".concat(year, "-").concat(month, "-").concat(day);
     } } };exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
 
