@@ -3,7 +3,7 @@
         <view class="contentHead">
             <view class="contentHead-v">
                 <view>总收入￥: 0</view>
-                <view>总支出￥: 1000</view>
+                <view style="color: #red;">总支出￥: 1000</view>
             </view>
             <view class="contentHead-v">
                 <view>月收入￥: </view>
@@ -23,7 +23,18 @@
                 <view class="todayView-v" >本日总收￥:</view>
                 <view class="todayView-v">本日总支出￥:</view>
             </view>
-            <!-- <view v-for="(item, index) in sss" :key="item.id">{{index + ':' + item.name}}</view> -->
+            <!-- <view class="inventoryBox"
+                    v-for="(item) in sss"
+                    :key="item.id">
+                    <view class="inventoryBox-l">
+                        <view>{{ item.id }}</view>
+                        <view>{{ item.name }}</view>
+                        <view>{{ item.radio }}</view>
+                    </view>
+                    <view class="inventoryBox-r">
+                        <view>{{ item.ramarks }}</view>
+                    </view>
+            </view> -->
             <button @click="onForm">哈哈哈哈</button>
         </view>
         <view>
@@ -59,7 +70,7 @@
                         </view>
                         <view class="formView">
                             <text class="formView-t">金额:</text>
-                            <input name="input" type="number" placeholder="请输入金额" />
+                            <input name="input" type="number" placeholder="请输入金额，小数点最多两位" />
                         </view>
                         <view class="formView">
                             <view class="formView-t">备注:</view>
@@ -100,28 +111,41 @@
                 format: true
             })
 			return {
-                nowtime: '',
-                showForm: false,
+                nowtime: '', // 今天日期(年-月-日)
+                cyear: '', // 年
+                cmonth: '', // 月
+                cdate: '', // 日
+                dateList: [], // 总日期金额数组
                 sss: [
-                    {
-                        id: 0,
-                        name: "1"
-                    },
-                    {
-                        id: 1,
-                        name: "2"
-                    }
+                   
                 ],
+                // sss: [
+                //     {
+                //         id: '2019-11-23',
+                //         name: "8498",
+                //         radio: '支出',
+                //         ramarks: '备注:'
+                //     },
+                //     {
+                //         id: '2019-11-23',
+                //         name: "123",
+                //         radio: '收入',
+                //         ramarks: '备注:'
+                //     }
+                // ],
                 date: currentDate
 			}
 		},
 		onLoad() {
             let date = new Date
-            let Y = date.getFullYear() + '-'
-            let M = date.getMonth() + 1 + '-'
+            let Y = date.getFullYear()
+            let M = date.getMonth() + 1
             let D = date.getDate();
-            let nowtime = Y + M + D
+            let nowtime = Y + '-' + M + '-' + D
             this.nowtime = String(nowtime)
+            this.cyear = Y
+            this.cmonth = M
+            this.cdate = D 
         },
         computed: {
             startDate() {
@@ -142,7 +166,6 @@
                 console.log(e)
             },
             onForm(e) {
-                this.showForm = true
                 this.$refs.popup.open()
             },
             bindDateChange: function(e) {
@@ -161,14 +184,35 @@
                 let formData = e.detail.value;
                 let checkRes = graceChecker.check(formData, rule);
                 if(checkRes){
-                    uni.showToast({title:"验证通过!", icon:"none"});
+                    console.log(formData, 'formData')
+                    let time = formData.picker // 日期
+                    let cyear = time.split('-')[0] // 年份
+                    let cmonth = time.split('-')[1] // 月份
+                    let cdate = time.split('-')[2] // 几号
+                    let list = this.sss // 总数据
+                    let aaa = []
+                    let qqq = {}
+                    if (list) {
+                       for (let key in list) {
+                           console.log(key, 'key')
+                           console.log(list[key], 'list[key]')
+                           
+                       }
+                    } else {
+                        list.push({cyear})
+                        console.log(list, 'list')
+                    }
+                    // console.log(time, 'time')
+                    console.log(cyear, 'cmonth')
+                    // console.log(cmonth, 'cmonth')
+                    // console.log(cdate, 'cdate')
+                    // uni.showToast({title:"验证通过!", icon:"none"});
                 } else {
                     uni.showToast({ title: graceChecker.error, icon: "none" });
                 }
             },
             // 表单取消
             formReset(e) {
-                this.showForm = false
                 this.$refs.popup.close()
             },
             getDate(type) {
@@ -221,6 +265,18 @@
         width: 45%;
         text-align: left;
         margin-left: 0rpx;
+    }
+
+    .inventoryBox {
+        display: flex;
+        width: 100%;
+        border-bottom: 1px solid #EEE9E9;
+        margin: 10rpx 0;
+    }
+
+    .inventoryBox-l {
+        width: 30%;
+        margin-right: 10rpx;
     }
 
     .formBox {
