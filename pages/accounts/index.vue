@@ -20,21 +20,21 @@
         />
         <view>
             <view class="todayView">
-                <view class="todayView-v" >本日总收￥:</view>
-                <view class="todayView-v">本日总支出￥:</view>
+                <view class="todayView-v" >本日总收￥: {{ incomeData }}</view>
+                <view class="todayView-v">本日总支出￥: {{ '-' + expendData }}</view>
             </view>
-            <!-- <view class="inventoryBox"
-                    v-for="(item) in sss"
-                    :key="item.id">
+            <view class="inventoryBox"
+                    v-for="(item, index) in nowList"
+                    :key="index">
                     <view class="inventoryBox-l">
-                        <view>{{ item.id }}</view>
-                        <view>{{ item.name }}</view>
+                        <view>{{ item.picker }}</view>
                         <view>{{ item.radio }}</view>
+                        <view>{{ item.input }}</view>
                     </view>
                     <view class="inventoryBox-r">
                         <view>{{ item.ramarks }}</view>
                     </view>
-            </view> -->
+            </view>
             <button @click="onForm">哈哈哈哈</button>
         </view>
         <view>
@@ -115,24 +115,10 @@
                 cyear: '', // 年
                 cmonth: '', // 月
                 cdate: '', // 日
-                dateList: [], // 总日期金额数组
-                sss: [
-                   
-                ],
-                // sss: [
-                //     {
-                //         id: '2019-11-23',
-                //         name: "8498",
-                //         radio: '支出',
-                //         ramarks: '备注:'
-                //     },
-                //     {
-                //         id: '2019-11-23',
-                //         name: "123",
-                //         radio: '收入',
-                //         ramarks: '备注:'
-                //     }
-                // ],
+                dateList: {}, // 总日期金额数组
+                incomeData: 0, // 本日收入数据
+                expendData: 0, // 本日支出数据
+                nowList: [], // 今天的数据
                 date: currentDate
 			}
 		},
@@ -189,24 +175,61 @@
                     let cyear = time.split('-')[0] // 年份
                     let cmonth = time.split('-')[1] // 月份
                     let cdate = time.split('-')[2] // 几号
-                    let list = this.sss // 总数据
-                    let aaa = []
-                    let qqq = {}
-                    if (list) {
-                       for (let key in list) {
-                           console.log(key, 'key')
-                           console.log(list[key], 'list[key]')
-                           
-                       }
-                    } else {
-                        list.push({cyear})
-                        console.log(list, 'list')
+                    let list = {...this.dateList} // 总数据
+                    let aaaa = {
+                        [cyear]: {
+                            [cmonth]: {
+                                [cdate]: [formData]
+                            }
+                        }
                     }
-                    // console.log(time, 'time')
-                    console.log(cyear, 'cmonth')
-                    // console.log(cmonth, 'cmonth')
-                    // console.log(cdate, 'cdate')
+                    console.log(aaaa, 'aaaaa')
+                    let qqq = {}
+                    if (JSON.stringify(list) === '{}') {
+                        qqq = {
+                           [cyear]: {
+                               [cmonth]: {
+                                   [cdate]: [formData]
+                               }
+                           }
+                        }
+                        list = {...qqq}
+                    } else {
+                        if (list[cyear]) {
+                            if (list[cyear][cmonth]) {
+                                if (list[cyear][cmonth][cdate]) {
+                                    list[cyear][cmonth][cdate].push(formData)
+                                    console.log(list, 'aaaabbbbb')
+                                } else {
+                                    qqq = {
+                                        [cdate]: [formData]
+                                    }
+                                    Object.assign(list[cyear][cmonth], qqq)
+                                }
+                            } else {
+                                qqq = {
+                                    [cmonth]: {
+                                        [cdate]: [formData]
+                                    }
+                                }
+                                 Object.assign(list[cyear], qqq)
+                            }
+                        } else {    
+                           qqq = {
+                               [cyear]: {
+                                   [cmonth]: {
+                                       [cdate]: [formData]
+                                   }
+                               }
+                           }
+                           Object.assign(list, qqq)
+                        }
+                    }
+                    this.dateList = {...list}
                     // uni.showToast({title:"验证通过!", icon:"none"});
+                    // this.addCalculate(list, cyear, cmonth, cdate) // 计算总金额
+                    // this.monthCalculate(list, cyear, cmonth) // 计算月金额
+                    this.todayCalculate(list, cyear, cmonth, cdate) // 计算本日金额
                 } else {
                     uni.showToast({ title: graceChecker.error, icon: "none" });
                 }
@@ -214,6 +237,37 @@
             // 表单取消
             formReset(e) {
                 this.$refs.popup.close()
+            },
+            // 计算总支出金额和总收入金额
+            addCalculate(list, cyear, cmonth, cdate) {
+                console.log(list, 'list')
+                console.log(cyear, 'cyear')
+                console.log(cmonth, 'cmonth')
+                console.log(cdate, 'cdate')
+            },
+            // 计算月支出金额和月收入金额
+            monthCalculate(list, cyear, cmonth) {
+
+            },
+            // 计算本日支出金额和本日收入金额
+            todayCalculate(list, cyear, cmonth, cdate) {
+                let listData = list[cyear][cmonth][cdate] //本日的数据
+                let income = 0 // 本日收入
+                let expend = 0 // 本日支出
+                console.log(listData, 'listData')
+                listData.map(item => {
+                    console.log(item, 'ltem')
+                    if (item.radio === "radio1") {
+                        income += Number(item.input)
+                    } else {
+                        expend += Number(item.input)
+                    }
+                })
+                this.incomeData = income
+                console.log(this.incomeData, 'incomeData')
+                console.log(expend, 'expend')
+                this.expendData = expend
+                this.nowList = listData
             },
             getDate(type) {
                 const date = new Date();

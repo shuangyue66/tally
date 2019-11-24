@@ -122,7 +122,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var uniCalendar = function uniCalendar() {return Promise.all(/*! import() | components/uni-calendar/uni-calendar */[__webpack_require__.e("common/vendor"), __webpack_require__.e("components/uni-calendar/uni-calendar")]).then(__webpack_require__.bind(null, /*! @/components/uni-calendar/uni-calendar */ 32));};var uniPopup = function uniPopup() {return __webpack_require__.e(/*! import() | components/uni-popup/uni-popup */ "components/uni-popup/uni-popup").then(__webpack_require__.bind(null, /*! @/components/uni-popup/uni-popup.vue */ 41));};
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};var ownKeys = Object.keys(source);if (typeof Object.getOwnPropertySymbols === 'function') {ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {return Object.getOwnPropertyDescriptor(source, sym).enumerable;}));}ownKeys.forEach(function (key) {_defineProperty(target, key, source[key]);});}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var uniCalendar = function uniCalendar() {return Promise.all(/*! import() | components/uni-calendar/uni-calendar */[__webpack_require__.e("common/vendor"), __webpack_require__.e("components/uni-calendar/uni-calendar")]).then(__webpack_require__.bind(null, /*! @/components/uni-calendar/uni-calendar */ 32));};var uniPopup = function uniPopup() {return __webpack_require__.e(/*! import() | components/uni-popup/uni-popup */ "components/uni-popup/uni-popup").then(__webpack_require__.bind(null, /*! @/components/uni-popup/uni-popup.vue */ 41));};
 
 
 
@@ -239,24 +239,10 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
       cyear: '', // 年
       cmonth: '', // 月
       cdate: '', // 日
-      dateList: [], // 总日期金额数组
-      sss: [],
-
-
-      // sss: [
-      //     {
-      //         id: '2019-11-23',
-      //         name: "8498",
-      //         radio: '支出',
-      //         ramarks: '备注:'
-      //     },
-      //     {
-      //         id: '2019-11-23',
-      //         name: "123",
-      //         radio: '收入',
-      //         ramarks: '备注:'
-      //     }
-      // ],
+      dateList: {}, // 总日期金额数组
+      incomeData: 0, // 本日收入数据
+      expendData: 0, // 本日支出数据
+      nowList: [], // 今天的数据
       date: currentDate };
 
   },
@@ -313,24 +299,61 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
         var cyear = time.split('-')[0]; // 年份
         var cmonth = time.split('-')[1]; // 月份
         var cdate = time.split('-')[2]; // 几号
-        var list = this.sss; // 总数据
-        var aaa = [];
-        var qqq = {};
-        if (list) {
-          for (var key in list) {
-            console.log(key, 'key');
-            console.log(list[key], 'list[key]');
+        var list = _objectSpread({}, this.dateList); // 总数据
+        var aaaa = _defineProperty({},
+        cyear, _defineProperty({},
+        cmonth, _defineProperty({},
+        cdate, [formData])));
 
-          }
+
+
+        console.log(aaaa, 'aaaaa');
+        var qqq = {};
+        if (JSON.stringify(list) === '{}') {
+          qqq = _defineProperty({},
+          cyear, _defineProperty({},
+          cmonth, _defineProperty({},
+          cdate, [formData])));
+
+
+
+          list = _objectSpread({}, qqq);
         } else {
-          list.push({ cyear: cyear });
-          console.log(list, 'list');
+          if (list[cyear]) {
+            if (list[cyear][cmonth]) {
+              if (list[cyear][cmonth][cdate]) {
+                list[cyear][cmonth][cdate].push(formData);
+                console.log(list, 'aaaabbbbb');
+              } else {
+                qqq = _defineProperty({},
+                cdate, [formData]);
+
+                Object.assign(list[cyear][cmonth], qqq);
+              }
+            } else {
+              qqq = _defineProperty({},
+              cmonth, _defineProperty({},
+              cdate, [formData]));
+
+
+              Object.assign(list[cyear], qqq);
+            }
+          } else {
+            qqq = _defineProperty({},
+            cyear, _defineProperty({},
+            cmonth, _defineProperty({},
+            cdate, [formData])));
+
+
+
+            Object.assign(list, qqq);
+          }
         }
-        // console.log(time, 'time')
-        console.log(cyear, 'cmonth');
-        // console.log(cmonth, 'cmonth')
-        // console.log(cdate, 'cdate')
+        this.dateList = _objectSpread({}, list);
         // uni.showToast({title:"验证通过!", icon:"none"});
+        // this.addCalculate(list, cyear, cmonth, cdate) // 计算总金额
+        // this.monthCalculate(list, cyear, cmonth) // 计算月金额
+        this.todayCalculate(list, cyear, cmonth, cdate); // 计算本日金额
       } else {
         uni.showToast({ title: graceChecker.error, icon: "none" });
       }
@@ -338,6 +361,37 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
     // 表单取消
     formReset: function formReset(e) {
       this.$refs.popup.close();
+    },
+    // 计算总支出金额和总收入金额
+    addCalculate: function addCalculate(list, cyear, cmonth, cdate) {
+      console.log(list, 'list');
+      console.log(cyear, 'cyear');
+      console.log(cmonth, 'cmonth');
+      console.log(cdate, 'cdate');
+    },
+    // 计算月支出金额和月收入金额
+    monthCalculate: function monthCalculate(list, cyear, cmonth) {
+
+    },
+    // 计算本日支出金额和本日收入金额
+    todayCalculate: function todayCalculate(list, cyear, cmonth, cdate) {
+      var listData = list[cyear][cmonth][cdate]; //本日的数据
+      var income = 0; // 本日收入
+      var expend = 0; // 本日支出
+      console.log(listData, 'listData');
+      listData.map(function (item) {
+        console.log(item, 'ltem');
+        if (item.radio === "radio1") {
+          income += Number(item.input);
+        } else {
+          expend += Number(item.input);
+        }
+      });
+      this.incomeData = income;
+      console.log(this.incomeData, 'incomeData');
+      console.log(expend, 'expend');
+      this.expendData = expend;
+      this.nowList = listData;
     },
     getDate: function getDate(type) {
       var date = new Date();
