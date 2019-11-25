@@ -6,8 +6,8 @@
                 <view style="color: #red;">总支出￥: 1000</view>
             </view>
             <view class="contentHead-v">
-                <view>月收入￥: </view>
-                <view>月支出￥: </view>
+                <view>月收入￥: {{yearIncomeData}}</view>
+                <view>月支出￥: {{yearExpendData}}</view>
             </view>
         </view>
 		<uni-calendar 
@@ -116,6 +116,8 @@
                 cmonth: '', // 月
                 cdate: '', // 日
                 dateList: {}, // 总日期金额数组
+                yearIncomeData: 0, // 月收入数据
+                yearExpendData: 0, // 月支出数据
                 incomeData: 0, // 本日收入数据
                 expendData: 0, // 本日支出数据
                 nowList: [], // 今天的数据
@@ -165,12 +167,9 @@
                     {name:"radio", checkType: "in", checkRule:"radio1,radio2",  errorMsg:"请选择方式"},
                     {name:"input", checkType: "therge",  errorMsg:"请输入金额"}
                 ];
-                console.log(e, 'eeee')
-                console.log(e.detail.value, 'ee')
                 let formData = e.detail.value;
                 let checkRes = graceChecker.check(formData, rule);
                 if(checkRes){
-                    console.log(formData, 'formData')
                     let time = formData.picker // 日期
                     let cyear = time.split('-')[0] // 年份
                     let cmonth = time.split('-')[1] // 月份
@@ -183,7 +182,6 @@
                             }
                         }
                     }
-                    console.log(aaaa, 'aaaaa')
                     let qqq = {}
                     if (JSON.stringify(list) === '{}') {
                         qqq = {
@@ -199,7 +197,6 @@
                             if (list[cyear][cmonth]) {
                                 if (list[cyear][cmonth][cdate]) {
                                     list[cyear][cmonth][cdate].push(formData)
-                                    console.log(list, 'aaaabbbbb')
                                 } else {
                                     qqq = {
                                         [cdate]: [formData]
@@ -227,9 +224,9 @@
                     }
                     this.dateList = {...list}
                     // uni.showToast({title:"验证通过!", icon:"none"});
-                    // this.addCalculate(list, cyear, cmonth, cdate) // 计算总金额
+                    this.addCalculate(list, cyear, cmonth, cdate) // 计算总金额
                     // this.monthCalculate(list, cyear, cmonth) // 计算月金额
-                    this.todayCalculate(list, cyear, cmonth, cdate) // 计算本日金额
+                    // this.todayCalculate(list, cyear, cmonth, cdate) // 计算本日金额
                 } else {
                     uni.showToast({ title: graceChecker.error, icon: "none" });
                 }
@@ -244,28 +241,130 @@
                 console.log(cyear, 'cyear')
                 console.log(cmonth, 'cmonth')
                 console.log(cdate, 'cdate')
+                let aaa = {
+                    '2019': {
+                        '11': {
+                            '01': [
+                                {
+                                    input: "123",
+                                    picker: "2019-11-01",
+                                    radio: "radio1",
+                                    ramarks: ""
+                                },
+                                {
+                                    input: "123",
+                                    picker: "2019-11-01",
+                                    radio: "radio1",
+                                    ramarks: ""
+                                }
+                            ],
+                            '02': [
+                                {
+                                    input: "123",
+                                    picker: "2019-11-02",
+                                    radio: "radio1",
+                                    ramarks: ""
+                                }
+                            ]
+                        }
+                    },
+                    '2020': {
+                        '01': {
+                            '02': [
+                                {
+                                    input: "123",
+                                    picker: "2020-01-02",
+                                    radio: "radio1",
+                                    ramarks: ""
+                                }
+                            ]
+                        },
+                        '02': {
+                            '11': [
+                                {
+                                    input: "123",
+                                    picker: "2020-02-11",
+                                    radio: "radio1",
+                                    ramarks: ""
+                                }
+                            ]
+                        }
+                    }
+                }
+                console.log(aaa, 'aaa')
+                console.log(aaa.length, 'length')
+                let ddd = Object.values(aaa)
+                console.log(ddd, 'ddd')
+                // let sss = Object.keys(sss)
+                // console.log(sss, 'sss')
             },
             // 计算月支出金额和月收入金额
             monthCalculate(list, cyear, cmonth) {
+                let yearlistData = list[cyear][cmonth] //月的数据
+                let yearIncome = 0 //月收入
+                let yearExpend = 0 //月支出
+                console.log(yearlistData, '111')
+                let aaa = {
+                    '2019': {
+                        '11': {
+                            '01': [
+                                {
+                                    input: "0.1",
+                                    picker: "2019-01-24",
+                                    radio: "radio1",
+                                    ramarks: ""
+                                },
+                                {
+                                    input: "123.54",
+                                    picker: "2019-01-23",
+                                    radio: "radio1",
+                                    ramarks: ""
+                                }
+                            ],
+                            '02': [
+                                {
+                                    input: "0.2",
+                                    picker: "2019-02-24",
+                                    radio: "radio1",
+                                    ramarks: ""
+                                }
+                            ]
+                        }
+                    }
+                }
+                let bbb = aaa[cyear][cmonth]
+                console.log(bbb, 'qweqwe')
+                let ccc = Object.values(bbb)
+                let kkk = [] // x
+                ccc.map(item =>{
+                    console.log(item, 'item')
+                    kkk = kkk.concat(item)
+                })
+                console.log(kkk, 'kkk')
+                kkk.map(item => {
+                    if (item.radio === "radio1") {
+                        yearIncome = (Number(yearIncome)*100 + Number(item.input)*100) /100
+                    } else {
+                        yearExpend += (Number(yearExpend)*100 + Number(item.input)*100) /100
+                    }
+                })
+                this.yearIncomeData = yearIncome //月收入
+                this.yearExpendData = yearExpend //月支出
 
             },
             // 计算本日支出金额和本日收入金额
             todayCalculate(list, cyear, cmonth, cdate) {
                 let listData = list[cyear][cmonth][cdate] //本日的数据
-                let income = 0 // 本日收入
-                let expend = 0 // 本日支出
-                console.log(listData, 'listData')
+                let income = 0 //本日收入
+                let expend = 0 //本日支出
                 listData.map(item => {
-                    console.log(item, 'ltem')
                     if (item.radio === "radio1") {
-                        income += Number(item.input)
+                        income = (Number(income)*100 + Number(item.input)*100) /100
                     } else {
-                        expend += Number(item.input)
+                        expend = (Number(expend)*100 + Number(item.input)*100) /100
                     }
                 })
                 this.incomeData = income
-                console.log(this.incomeData, 'incomeData')
-                console.log(expend, 'expend')
                 this.expendData = expend
                 this.nowList = listData
             },
