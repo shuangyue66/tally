@@ -2,12 +2,13 @@
 	<view class="content">
         <view class="contentHead">
             <view class="contentHead-v">
-                <view>总收入￥: 0</view>
-                <view style="color: #red;">总支出￥: 1000</view>
+                <view>总收入￥: {{addincomeData}}</view>
+                <view style="color: #red;">总支出￥: {{addexpendData}}</view>
+                <view>总余额￥: {{addbalanceData}}</view>
             </view>
             <view class="contentHead-v">
-                <view>月收入￥: {{yearIncomeData}}</view>
-                <view>月支出￥: {{yearExpendData}}</view>
+                <view>月收入￥: {{monthIncomeData}}</view>
+                <view>月支出￥: {{monthExpendData}}</view>
             </view>
         </view>
 		<uni-calendar 
@@ -18,7 +19,7 @@
             @change="change"
             @month-switch="monthSwitch"
         />
-        <view>
+        <view v-if="showDay">
             <view class="todayView">
                 <view class="todayView-v" >本日总收￥: {{ incomeData }}</view>
                 <view class="todayView-v">本日总支出￥: {{ '-' + expendData }}</view>
@@ -35,8 +36,8 @@
                         <view>{{ item.ramarks }}</view>
                     </view>
             </view>
-            <button @click="onForm">哈哈哈哈</button>
         </view>
+        <button @click="onForm">哈哈哈哈</button>
         <view>
             <uni-popup 
                 ref="popup" 
@@ -111,53 +112,104 @@
                 format: true
             })
 			return {
-                nowtime: '', // 今天日期(年-月-日)
-                cyear: '', // 年
-                cmonth: '', // 月
-                cdate: '', // 日
-                dateList: {}, // 总日期金额数组
-                yearIncomeData: 0, // 月收入数据
-                yearExpendData: 0, // 月支出数据
+                timeList: {
+                    nowtime: '', // 今天日期(年-月-日)
+                    cyear: '', // 年
+                    cmonth: '', // 月
+                    cdate: '', // 日
+                },
+                YMtime: '', // 年月
+                adddateList: {}, // 总日期金额数组
+                addincomeData: 0, //总收入数据
+                addexpendData: 0, // 总支出数据
+                addbalanceData: 0, // 总余额数据
+                monthIncomeData: 0, // 月收入数据
+                monthExpendData: 0, // 月支出数据
                 incomeData: 0, // 本日收入数据
                 expendData: 0, // 本日支出数据
                 nowList: [], // 今天的数据
-                date: currentDate
+                date: currentDate,
+                showDay: true
 			}
 		},
 		onLoad() {
+            let newList = uni.getStorageSync('list');
             let date = new Date
             let Y = date.getFullYear()
             let M = date.getMonth() + 1
             let D = date.getDate();
-            let nowtime = Y + '-' + M + '-' + D
-            this.nowtime = String(nowtime)
-            this.cyear = Y
-            this.cmonth = M
-            this.cdate = D 
+            let newtime = {
+                nowtime: `${Y}-${M}-${D}`,
+                cyear: Y,
+                cmonth: M,
+                cdate: D
+            }
+            this.YMtime = `${Y}-${M}`
+            this.timeList = {
+                ...newtime
+            }
+            if (newList) {
+                this.adddateList = newList
+                this.addCalculate(newList) //总数据
+                this.monthCalculate(newList, Y, M) //月数据
+                this.todayCalculate(newList, Y, M, D) //本日数据
+            }
         },
         computed: {
             startDate() {
                 console.log(this.getDate('start'), '11111')
             },
             endDate() {
-                console.log(this.getDate('end'), '22222')
                 return this.getDate('end');
             }
         },
 		methods: {
             // 点击日期触发
 			change(e) {
-                console.log(e);
+                // let year = e.year
+                // let month = e.month
+                // let day = e.date
+                // let nowtime = `${year}-${month}-${day}`
+                let newtime = {
+                    nowtime: `${e.year}-${e.month}-${e.date}`,
+                    cyear: e.year,
+                    cmonth: e.month,
+                    cdate: e.date
+                }
+                let YM = `${e.year}-${e.month}`
+                this.YMtime = YM 
+                this.showDay = true
+                this.timeList = {
+                   ...newtime
+                }
+                let add = this.adddateList
+                this.todayCalculate(add, newtime.cyear, newtime.cmonth, newtime.cdate)
             },
             // 更换月份触发
             monthSwitch(e) {
-                console.log(e)
+                let year = e.year
+                let month = e.month
+                if (Number(month) < 9) {
+                    month = `0${month}`
+                }
+                let YM = `${year}-${month}`
+                if (YM === this.YMtime) {
+                    this.showDay = true
+                } else {
+                    this.showDay = false
+                }
+                this.timeList = {
+                    ...this.timeList,
+                    cyear: year,
+                    cmonth: month
+                }
+                let add = this.adddateList
+                this.monthCalculate(add, year, month)
             },
             onForm(e) {
                 this.$refs.popup.open()
             },
             bindDateChange: function(e) {
-                console.log(e.target.value, '1123123')
                 this.date = e.target.value
             },
             // 表单确认
@@ -174,59 +226,126 @@
                     let cyear = time.split('-')[0] // 年份
                     let cmonth = time.split('-')[1] // 月份
                     let cdate = time.split('-')[2] // 几号
-                    let list = {...this.dateList} // 总数据
-                    let aaaa = {
-                        [cyear]: {
-                            [cmonth]: {
-                                [cdate]: [formData]
-                            }
+                    let list = {...this.adddateList} // 总数据
+                    
+                    let asd = formData
+
+                    if (formData.radio === 'radio1') {
+                        asd = {
+                            ...asd,
+                            income: Number(formData.input),
+                            expend: 0
+                        }
+                    } else {
+                        asd = {
+                            ...asd,
+                            income: 0,
+                            expend: Number(formData.input)
                         }
                     }
-                    let qqq = {}
+
+                    let newList = {}
                     if (JSON.stringify(list) === '{}') {
-                        qqq = {
-                           [cyear]: {
+                        newList = {
+                            addexpend: asd.expend, //总支出
+                            addincome: asd.income, //总收入
+                            [cyear]: {
+                               yearexpend: asd.expend, //年支出
+                               yearincome: asd.income, //年收入
                                [cmonth]: {
-                                   [cdate]: [formData]
-                               }
-                           }
+                                    monthexpend: asd.expend, //月支出
+                                    monthincome: asd.income, //月收入
+                                    day: {
+                                       [cdate]: {
+                                           dayexpend: asd.expend, //本日支出
+                                           dayincome: asd.income, //本日收入
+                                           data: [asd]
+                                       }
+                                    }
+                                }
+                            }
                         }
-                        list = {...qqq}
+                        list = {...newList}
                     } else {
                         if (list[cyear]) {
                             if (list[cyear][cmonth]) {
-                                if (list[cyear][cmonth][cdate]) {
-                                    list[cyear][cmonth][cdate].push(formData)
+                                if (list[cyear][cmonth].day[cdate]) {
+                                    list.addexpend = (Number(list.addexpend)*100 + Number(asd.expend)*100) /100 //总支出
+                                    list.addincome = (Number(list.addincome)*100 + Number(asd.income)*100) /100 //总收入
+                                    list[cyear].yearexpend = (Number(list[cyear].yearexpend)*100 + Number(asd.expend)*100) /100 //年支出
+                                    list[cyear].yearincome = (Number(list[cyear].yearincome)*100 + Number(asd.income)*100) /100 //年收入
+                                    list[cyear][cmonth].monthexpend = (Number(list[cyear][cmonth].monthexpend)*100 + Number(asd.expend)*100) /100 //月支出
+                                    list[cyear][cmonth].monthincome = (Number(list[cyear][cmonth].monthincome)*100 + Number(asd.income)*100) /100 //月收入
+                                    list[cyear][cmonth].day[cdate].dayexpend = (Number(list[cyear][cmonth].day[cdate].dayexpend)*100 + Number(asd.expend)*100) /100 //本日支出
+                                    list[cyear][cmonth].day[cdate].dayincome = (Number(list[cyear][cmonth].day[cdate].dayincome)*100 + Number(asd.income)*100) /100 //本日收入
+                                    list[cyear][cmonth].day[cdate].data.push(asd)
                                 } else {
-                                    qqq = {
-                                        [cdate]: [formData]
+                                    newList = {
+                                        [cdate]: {
+                                            dayexpend: asd.expend, //本日支出
+                                            dayincome: asd.income, //本日收入
+                                            data: [asd]
+                                        }
                                     }
-                                    Object.assign(list[cyear][cmonth], qqq)
+                                    Object.assign(list[cyear][cmonth].day, newList)
+                                    list.addexpend = (Number(list.addexpend)*100 + Number(asd.expend)*100) /100 //总支出
+                                    list.addincome = (Number(list.addincome)*100 + Number(asd.income)*100) /100 //总收入
+                                    list[cyear].yearexpend = (Number(list[cyear].yearexpend)*100 + Number(asd.expend)*100) /100 //年支出
+                                    list[cyear].yearincome = (Number(list[cyear].yearincome)*100 + Number(asd.income)*100) /100 //年收入
+                                    list[cyear][cmonth].monthexpend = (Number(list[cyear][cmonth].monthexpend)*100 + Number(asd.expend)*100) /100 //月支出
+                                    list[cyear][cmonth].monthincome = (Number(list[cyear][cmonth].monthincome)*100 + Number(asd.income)*100) /100 //月收入
                                 }
                             } else {
-                                qqq = {
+                                newList = {
                                     [cmonth]: {
-                                        [cdate]: [formData]
+                                        monthexpend: asd.expend, //月支出
+                                        monthincome: asd.income, //月收入
+                                        day:{
+                                            [cdate]: {
+                                                dayexpend: asd.expend, //本日支出
+                                                dayincome: asd.income, //本日收入
+                                                data: [asd]
+                                            }
+                                        }
                                     }
                                 }
-                                 Object.assign(list[cyear], qqq)
+                                Object.assign(list[cyear], newList)
+                                list.addexpend = (Number(list.addexpend)*100 + Number(asd.expend)*100) /100  //总支出
+                                list.addincome = (Number(list.addincome)*100 + Number(asd.income)*100) /100  //总收入
+                                list[cyear].yearexpend = (Number(list[cyear].yearexpend)*100 + Number(asd.expend)*100) /100 //年支出
+                                list[cyear].yearincome = (Number(list[cyear].yearincome)*100 + Number(asd.income)*100) /100 //年收入
                             }
-                        } else {    
-                           qqq = {
-                               [cyear]: {
-                                   [cmonth]: {
-                                       [cdate]: [formData]
-                                   }
-                               }
-                           }
-                           Object.assign(list, qqq)
+                        } else {   
+                            newList = {
+                                [cyear]: {
+                                    yearexpend: asd.expend, //年支出
+                                    yearincome: asd.income, //年收入
+                                    [cmonth]: {
+                                        monthexpend: asd.expend, //月支出
+                                        monthincome: asd.income, //月收入
+                                        day: {
+                                            [cdate]: {
+                                                dayexpend: asd.expend, //本日支出
+                                                dayincome: asd.income, //本日收入
+                                                data: [asd]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Object.assign(list, newList)
+                            list.addexpend = (Number(list.addexpend)*100 + Number(asd.expend)*100) /100, //总支出
+                            list.addincome = (Number(list.addincome)*100 + Number(asd.income)*100) /100 //总收入
                         }
                     }
-                    this.dateList = {...list}
-                    // uni.showToast({title:"验证通过!", icon:"none"});
-                    this.addCalculate(list, cyear, cmonth, cdate) // 计算总金额
-                    // this.monthCalculate(list, cyear, cmonth) // 计算月金额
-                    // this.todayCalculate(list, cyear, cmonth, cdate) // 计算本日金额
+
+                    this.adddateList = {...list}
+                    this.addCalculate(list) // 计算总金额
+                    this.monthCalculate(list, cyear, cmonth) // 计算月金额
+                    this.todayCalculate(list, cyear, cmonth, cdate) // 计算本日金额
+                    uni.setStorageSync('list', list)
+                    uni.showToast({title:"验证通过!", icon:"none"});
+                    this.$refs.popup.close()
                 } else {
                     uni.showToast({ title: graceChecker.error, icon: "none" });
                 }
@@ -236,137 +355,47 @@
                 this.$refs.popup.close()
             },
             // 计算总支出金额和总收入金额
-            addCalculate(list, cyear, cmonth, cdate) {
-                console.log(list, 'list')
-                console.log(cyear, 'cyear')
-                console.log(cmonth, 'cmonth')
-                console.log(cdate, 'cdate')
-                let aaa = {
-                    '2019': {
-                        '11': {
-                            '01': [
-                                {
-                                    input: "123",
-                                    picker: "2019-11-01",
-                                    radio: "radio1",
-                                    ramarks: ""
-                                },
-                                {
-                                    input: "123",
-                                    picker: "2019-11-01",
-                                    radio: "radio1",
-                                    ramarks: ""
-                                }
-                            ],
-                            '02': [
-                                {
-                                    input: "123",
-                                    picker: "2019-11-02",
-                                    radio: "radio1",
-                                    ramarks: ""
-                                }
-                            ]
-                        }
-                    },
-                    '2020': {
-                        '01': {
-                            '02': [
-                                {
-                                    input: "123",
-                                    picker: "2020-01-02",
-                                    radio: "radio1",
-                                    ramarks: ""
-                                }
-                            ]
-                        },
-                        '02': {
-                            '11': [
-                                {
-                                    input: "123",
-                                    picker: "2020-02-11",
-                                    radio: "radio1",
-                                    ramarks: ""
-                                }
-                            ]
-                        }
-                    }
-                }
-                console.log(aaa, 'aaa')
-                console.log(aaa.length, 'length')
-                let ddd = Object.values(aaa)
-                console.log(ddd, 'ddd')
-                // let sss = Object.keys(sss)
-                // console.log(sss, 'sss')
+            addCalculate(list) {
+                let addIncome = list.addincome //总收入
+                let addExpend = list.addexpend //总支出
+                let addBalance = (Number(addIncome)*100 - Number(addExpend)*100) /100
+                this.addincomeData = addIncome //总收入
+                this.addexpendData = addExpend //总支出
+                this.addbalanceData = addBalance //总余额
             },
             // 计算月支出金额和月收入金额
             monthCalculate(list, cyear, cmonth) {
-                let yearlistData = list[cyear][cmonth] //月的数据
-                let yearIncome = 0 //月收入
-                let yearExpend = 0 //月支出
-                console.log(yearlistData, '111')
-                let aaa = {
-                    '2019': {
-                        '11': {
-                            '01': [
-                                {
-                                    input: "0.1",
-                                    picker: "2019-01-24",
-                                    radio: "radio1",
-                                    ramarks: ""
-                                },
-                                {
-                                    input: "123.54",
-                                    picker: "2019-01-23",
-                                    radio: "radio1",
-                                    ramarks: ""
-                                }
-                            ],
-                            '02': [
-                                {
-                                    input: "0.2",
-                                    picker: "2019-02-24",
-                                    radio: "radio1",
-                                    ramarks: ""
-                                }
-                            ]
-                        }
+                let nowyear = Number(this.timeList.cyear) //日历当前的年份
+                let nowmonth = Number(this.timeList.cmonth) //日历当前的月份
+                if (nowmonth == Number(cmonth) && nowyear == Number(cyear)) {
+                    if (list[cyear] && list[cyear][cmonth]) {
+                        let monthlistData = list[cyear][cmonth] //月的数据
+                        let monthIncome = list[cyear][cmonth].monthincome //月收入
+                        let monthExpend = list[cyear][cmonth].monthexpend //月支出
+                        this.monthIncomeData = monthIncome //月收入
+                        this.monthExpendData = monthExpend //月支出
+                    } else {
+                        this.monthIncomeData = 0 //月收入
+                        this.monthExpendData = 0 //月支出
                     }
                 }
-                let bbb = aaa[cyear][cmonth]
-                console.log(bbb, 'qweqwe')
-                let ccc = Object.values(bbb)
-                let kkk = [] // x
-                ccc.map(item =>{
-                    console.log(item, 'item')
-                    kkk = kkk.concat(item)
-                })
-                console.log(kkk, 'kkk')
-                kkk.map(item => {
-                    if (item.radio === "radio1") {
-                        yearIncome = (Number(yearIncome)*100 + Number(item.input)*100) /100
-                    } else {
-                        yearExpend += (Number(yearExpend)*100 + Number(item.input)*100) /100
-                    }
-                })
-                this.yearIncomeData = yearIncome //月收入
-                this.yearExpendData = yearExpend //月支出
-
             },
             // 计算本日支出金额和本日收入金额
             todayCalculate(list, cyear, cmonth, cdate) {
-                let listData = list[cyear][cmonth][cdate] //本日的数据
-                let income = 0 //本日收入
-                let expend = 0 //本日支出
-                listData.map(item => {
-                    if (item.radio === "radio1") {
-                        income = (Number(income)*100 + Number(item.input)*100) /100
+                let nowTime = this.timeList.nowtime //当前的时间
+                let newTime = `${cyear}-${cmonth}-${cdate}`
+                if (nowTime === newTime) {
+                    if (list[cyear] && list[cyear][cmonth] && list[cyear][cmonth].day[cdate]) {
+                        let listData = list[cyear][cmonth].day[cdate].data //本日的数据
+                        let income = list[cyear][cmonth].day[cdate].dayincome //本日收入
+                        let expend = list[cyear][cmonth].day[cdate].dayexpend //本日支出
+                        this.incomeData = income
+                        this.expendData = expend
+                        this.nowList = listData
                     } else {
-                        expend = (Number(expend)*100 + Number(item.input)*100) /100
+                        this.showDay = false
                     }
-                })
-                this.incomeData = income
-                this.expendData = expend
-                this.nowList = listData
+                }
             },
             getDate(type) {
                 const date = new Date();
