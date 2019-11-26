@@ -19,18 +19,18 @@
 	        justify-content: center;
 }
 .swiper-box {
-	width: 600rpx;
+	width: 100%;
 	margin: 60rpx auto 0;
 }
 .swiper {
-	height: 300rpx;
+	height: 400rpx;
 }
 .swiper-item{
-	width: 600rpx;
-	height: 300rpx;
+	width: 750rpx;
+	height: 400rpx;
 }
 .text-area {
-	width: 300rpx;
+	width: 600rpx;
 	margin: 30rpx 0;
 	display: -webkit-box;
 	display: -webkit-flex;

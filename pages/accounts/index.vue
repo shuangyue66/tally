@@ -44,54 +44,58 @@
                 type="center"
                 :maskClick="false">
                 <view class="formBox">
-                    <form @submit="formSubmit" @reset="formReset">
-                        <view class="formView">
-                            <text class="formView-t">时间:</text>
-                            <view>
-                                <picker mode="date"
-                                        name="picker"
-                                        :value="date"
-                                        :start="startDate"
-                                        :end="endDate"
-                                        @change="bindDateChange">
-                                    <view>{{date}}</view>
-                                </picker>
-                            </view>
+                    <view>
+                        <text class="formView-t">时间:</text>
+                        <view>
+                            <picker mode="date"
+                                    :value="formDetail.picker"
+                                    :start="startDate"
+                                    :end="endDate"
+                                    @change="bindDateChange">
+                                <view>{{date}}</view>
+                            </picker>
                         </view>
-                        <view class="formView">
-                            <text class="formView-t">方式:</text>
-                            <radio-group name="radio">
-                                <label>
-                                    <radio value="radio1" /><text>收入</text>
-                                </label>
-                                <label>
-                                    <radio value="radio2" /><text>支出</text>
-                                </label>
-                            </radio-group>
-                        </view>
-                        <view class="formView">
-                            <text class="formView-t">金额:</text>
-                            <input name="input" type="number" placeholder="请输入金额，小数点最多两位" />
-                        </view>
-                        <view class="formView">
-                            <view class="formView-t">备注:</view>
-                            <textarea name="ramarks"
-                                    style="height: 200rpx; background: #FAFAFA;"
-                                    placeholder="请输入备注"
-                                    maxlength="100"
-                                    />
-                        </view>
-                        <view class="formBrn">
-                            <button class="brn"
-                                    type="warn"
-                                    plain="true"
-                                    form-type="reset">取消</button>
-                            <button class="brn"
-                                    type="primary" 
-                                    plain="true"
-                                    form-type="submit">确认</button>
-                        </view>
-                    </form>
+                    </view>
+                    <view class="formView">
+                        <text class="formView-t">方式:</text>
+                        <radio-group @change="formRadio"
+                                    :value="formDetail.radio"
+                                    >
+                            <label>
+                                <radio value="radio1" :checked="radioData.radio1"/><text>收入</text>
+                            </label>
+                            <label>
+                                <radio value="radio2" :checked="radioData.radio2"/><text>支出</text>
+                            </label>
+                        </radio-group>
+                    </view>
+                    <view class="formView">
+                        <text class="formView-t">金额:</text>
+                        <input type="digit"
+                                :value="formDetail.input"
+                                @input="formInput"
+                                placeholder="请输入金额，小数点最多两位" />
+                    </view>
+                    <view class="formView">
+                        <view class="formView-t">备注:</view>
+                        <textarea :value="formDetail.ramarks" 
+                                @input="formRamarks"
+                                style="height: 200rpx; background: #FAFAFA;"
+                                placeholder="请输入备注"
+                                maxlength="100"
+                                />
+                    </view>
+                    <view class="formBrn">
+                        <button class="brn"
+                                type="warn"
+                                plain="true"
+                                ref="resetB"
+                                @click="formReset">取消</button>
+                        <button class="brn"
+                                type="primary" 
+                                plain="true"
+                                @click="formSubmit">确认</button>
+                    </view>
                 </view>
             </uni-popup>
         </view>
@@ -112,6 +116,12 @@
                 format: true
             })
 			return {
+                formDetail: {
+                    picker: '', //时间
+                    radio: '', //方式
+                    input: '', //金额
+                    ramarks: '', //备注 
+                },
                 timeList: {
                     nowtime: '', // 今天日期(年-月-日)
                     cyear: '', // 年
@@ -129,7 +139,11 @@
                 expendData: 0, // 本日支出数据
                 nowList: [], // 今天的数据
                 date: currentDate,
-                showDay: true
+                showDay: true,
+                radioData: {
+                    radio1: false,
+                    radio2: false
+                }
 			}
 		},
 		onLoad() {
@@ -207,59 +221,84 @@
                 this.monthCalculate(add, year, month)
             },
             onForm(e) {
+                console.log(this.formDetail, 'formDetail')
                 this.$refs.popup.open()
             },
+            // 表单时间
             bindDateChange: function(e) {
-                this.date = e.target.value
+                console.log(e, 'eaeea')
+                this.date = e.detail.value
+                this.formDetail.picker = e.detail.value
+            },
+            // 表单方式
+            formRadio(e) {
+                console.log(e, 'eeeeee')
+                if (e.detail.value === 'radio1') {
+                    this.radioData.radio1 = true
+                } else {
+                    this.radioData.radio2 = true
+                }
+                this.formDetail.radio = e.detail.value
+            },
+            // 表单金额
+            formInput(e) {
+                console.log(e.detail.value, 'weq')
+                this.formDetail.input = e.detail.value
+            },
+            // 表单备注
+            formRamarks(e) {
+                console.log(e.detail.value, 'formRamarks')
+                this.formDetail.ramarks = e.detail.value
             },
             // 表单确认
             formSubmit(e) {
+                let formParams = {...this.formDetail} // 表单参数
                 let rule = [
                     {name:"picker", checkType: "notnull", checkRule:"",  errorMsg:"请选择日期"},
                     {name:"radio", checkType: "in", checkRule:"radio1,radio2",  errorMsg:"请选择方式"},
                     {name:"input", checkType: "therge",  errorMsg:"请输入金额"}
                 ];
-                let formData = e.detail.value;
-                let checkRes = graceChecker.check(formData, rule);
+                let checkRes = graceChecker.check(formParams, rule);
                 if(checkRes){
-                    let time = formData.picker // 日期
+                    let time = formParams.picker // 日期
                     let cyear = time.split('-')[0] // 年份
                     let cmonth = time.split('-')[1] // 月份
                     let cdate = time.split('-')[2] // 几号
                     let list = {...this.adddateList} // 总数据
-                    
-                    let asd = formData
 
-                    if (formData.radio === 'radio1') {
-                        asd = {
-                            ...asd,
-                            income: Number(formData.input),
+                    let dataParams = {}                    
+
+                    if (formParams.radio === 'radio1') {
+                        dataParams = {
+                            ...formParams,
+                            radio: '收入',
+                            income: Number(formParams.input),
                             expend: 0
                         }
                     } else {
-                        asd = {
-                            ...asd,
+                        dataParams = {
+                            ...formParams,
+                            radio: '支出',
                             income: 0,
-                            expend: Number(formData.input)
+                            expend: Number(formParams.input)
                         }
                     }
-
                     let newList = {}
                     if (JSON.stringify(list) === '{}') {
                         newList = {
-                            addexpend: asd.expend, //总支出
-                            addincome: asd.income, //总收入
+                            addexpend: dataParams.expend, //总支出
+                            addincome: dataParams.income, //总收入
                             [cyear]: {
-                               yearexpend: asd.expend, //年支出
-                               yearincome: asd.income, //年收入
+                               yearexpend: dataParams.expend, //年支出
+                               yearincome: dataParams.income, //年收入
                                [cmonth]: {
-                                    monthexpend: asd.expend, //月支出
-                                    monthincome: asd.income, //月收入
+                                    monthexpend: dataParams.expend, //月支出
+                                    monthincome: dataParams.income, //月收入
                                     day: {
                                        [cdate]: {
-                                           dayexpend: asd.expend, //本日支出
-                                           dayincome: asd.income, //本日收入
-                                           data: [asd]
+                                           dayexpend: dataParams.expend, //本日支出
+                                           dayincome: dataParams.income, //本日收入
+                                           data: [dataParams]
                                        }
                                     }
                                 }
@@ -270,72 +309,72 @@
                         if (list[cyear]) {
                             if (list[cyear][cmonth]) {
                                 if (list[cyear][cmonth].day[cdate]) {
-                                    list.addexpend = (Number(list.addexpend)*100 + Number(asd.expend)*100) /100 //总支出
-                                    list.addincome = (Number(list.addincome)*100 + Number(asd.income)*100) /100 //总收入
-                                    list[cyear].yearexpend = (Number(list[cyear].yearexpend)*100 + Number(asd.expend)*100) /100 //年支出
-                                    list[cyear].yearincome = (Number(list[cyear].yearincome)*100 + Number(asd.income)*100) /100 //年收入
-                                    list[cyear][cmonth].monthexpend = (Number(list[cyear][cmonth].monthexpend)*100 + Number(asd.expend)*100) /100 //月支出
-                                    list[cyear][cmonth].monthincome = (Number(list[cyear][cmonth].monthincome)*100 + Number(asd.income)*100) /100 //月收入
-                                    list[cyear][cmonth].day[cdate].dayexpend = (Number(list[cyear][cmonth].day[cdate].dayexpend)*100 + Number(asd.expend)*100) /100 //本日支出
-                                    list[cyear][cmonth].day[cdate].dayincome = (Number(list[cyear][cmonth].day[cdate].dayincome)*100 + Number(asd.income)*100) /100 //本日收入
-                                    list[cyear][cmonth].day[cdate].data.push(asd)
+                                    list.addexpend = (Number(list.addexpend)*100 + Number(dataParams.expend)*100) /100 //总支出
+                                    list.addincome = (Number(list.addincome)*100 + Number(dataParams.income)*100) /100 //总收入
+                                    list[cyear].yearexpend = (Number(list[cyear].yearexpend)*100 + Number(dataParams.expend)*100) /100 //年支出
+                                    list[cyear].yearincome = (Number(list[cyear].yearincome)*100 + Number(dataParams.income)*100) /100 //年收入
+                                    list[cyear][cmonth].monthexpend = (Number(list[cyear][cmonth].monthexpend)*100 + Number(dataParams.expend)*100) /100 //月支出
+                                    list[cyear][cmonth].monthincome = (Number(list[cyear][cmonth].monthincome)*100 + Number(dataParams.income)*100) /100 //月收入
+                                    list[cyear][cmonth].day[cdate].dayexpend = (Number(list[cyear][cmonth].day[cdate].dayexpend)*100 + Number(dataParams.expend)*100) /100 //本日支出
+                                    list[cyear][cmonth].day[cdate].dayincome = (Number(list[cyear][cmonth].day[cdate].dayincome)*100 + Number(dataParams.income)*100) /100 //本日收入
+                                    list[cyear][cmonth].day[cdate].data.push(dataParams)
                                 } else {
                                     newList = {
                                         [cdate]: {
-                                            dayexpend: asd.expend, //本日支出
-                                            dayincome: asd.income, //本日收入
-                                            data: [asd]
+                                            dayexpend: dataParams.expend, //本日支出
+                                            dayincome: dataParams.income, //本日收入
+                                            data: [dataParams]
                                         }
                                     }
                                     Object.assign(list[cyear][cmonth].day, newList)
-                                    list.addexpend = (Number(list.addexpend)*100 + Number(asd.expend)*100) /100 //总支出
-                                    list.addincome = (Number(list.addincome)*100 + Number(asd.income)*100) /100 //总收入
-                                    list[cyear].yearexpend = (Number(list[cyear].yearexpend)*100 + Number(asd.expend)*100) /100 //年支出
-                                    list[cyear].yearincome = (Number(list[cyear].yearincome)*100 + Number(asd.income)*100) /100 //年收入
-                                    list[cyear][cmonth].monthexpend = (Number(list[cyear][cmonth].monthexpend)*100 + Number(asd.expend)*100) /100 //月支出
-                                    list[cyear][cmonth].monthincome = (Number(list[cyear][cmonth].monthincome)*100 + Number(asd.income)*100) /100 //月收入
+                                    list.addexpend = (Number(list.addexpend)*100 + Number(dataParams.expend)*100) /100 //总支出
+                                    list.addincome = (Number(list.addincome)*100 + Number(dataParams.income)*100) /100 //总收入
+                                    list[cyear].yearexpend = (Number(list[cyear].yearexpend)*100 + Number(dataParams.expend)*100) /100 //年支出
+                                    list[cyear].yearincome = (Number(list[cyear].yearincome)*100 + Number(dataParams.income)*100) /100 //年收入
+                                    list[cyear][cmonth].monthexpend = (Number(list[cyear][cmonth].monthexpend)*100 + Number(dataParams.expend)*100) /100 //月支出
+                                    list[cyear][cmonth].monthincome = (Number(list[cyear][cmonth].monthincome)*100 + Number(dataParams.income)*100) /100 //月收入
                                 }
                             } else {
                                 newList = {
                                     [cmonth]: {
-                                        monthexpend: asd.expend, //月支出
-                                        monthincome: asd.income, //月收入
+                                        monthexpend: dataParams.expend, //月支出
+                                        monthincome: dataParams.income, //月收入
                                         day:{
                                             [cdate]: {
-                                                dayexpend: asd.expend, //本日支出
-                                                dayincome: asd.income, //本日收入
-                                                data: [asd]
+                                                dayexpend: dataParams.expend, //本日支出
+                                                dayincome: dataParams.income, //本日收入
+                                                data: [dataParams]
                                             }
                                         }
                                     }
                                 }
                                 Object.assign(list[cyear], newList)
-                                list.addexpend = (Number(list.addexpend)*100 + Number(asd.expend)*100) /100  //总支出
-                                list.addincome = (Number(list.addincome)*100 + Number(asd.income)*100) /100  //总收入
-                                list[cyear].yearexpend = (Number(list[cyear].yearexpend)*100 + Number(asd.expend)*100) /100 //年支出
-                                list[cyear].yearincome = (Number(list[cyear].yearincome)*100 + Number(asd.income)*100) /100 //年收入
+                                list.addexpend = (Number(list.addexpend)*100 + Number(dataParams.expend)*100) /100  //总支出
+                                list.addincome = (Number(list.addincome)*100 + Number(dataParams.income)*100) /100  //总收入
+                                list[cyear].yearexpend = (Number(list[cyear].yearexpend)*100 + Number(dataParams.expend)*100) /100 //年支出
+                                list[cyear].yearincome = (Number(list[cyear].yearincome)*100 + Number(dataParams.income)*100) /100 //年收入
                             }
                         } else {   
                             newList = {
                                 [cyear]: {
-                                    yearexpend: asd.expend, //年支出
-                                    yearincome: asd.income, //年收入
+                                    yearexpend: dataParams.expend, //年支出
+                                    yearincome: dataParams.income, //年收入
                                     [cmonth]: {
-                                        monthexpend: asd.expend, //月支出
-                                        monthincome: asd.income, //月收入
+                                        monthexpend: dataParams.expend, //月支出
+                                        monthincome: dataParams.income, //月收入
                                         day: {
                                             [cdate]: {
-                                                dayexpend: asd.expend, //本日支出
-                                                dayincome: asd.income, //本日收入
-                                                data: [asd]
+                                                dayexpend: dataParams.expend, //本日支出
+                                                dayincome: dataParams.income, //本日收入
+                                                data: [dataParams]
                                             }
                                         }
                                     }
                                 }
                             }
                             Object.assign(list, newList)
-                            list.addexpend = (Number(list.addexpend)*100 + Number(asd.expend)*100) /100, //总支出
-                            list.addincome = (Number(list.addincome)*100 + Number(asd.income)*100) /100 //总收入
+                            list.addexpend = (Number(list.addexpend)*100 + Number(dataParams.expend)*100) /100, //总支出
+                            list.addincome = (Number(list.addincome)*100 + Number(dataParams.income)*100) /100 //总收入
                         }
                     }
 
@@ -345,13 +384,24 @@
                     this.todayCalculate(list, cyear, cmonth, cdate) // 计算本日金额
                     uni.setStorageSync('list', list)
                     uni.showToast({title:"验证通过!", icon:"none"});
-                    this.$refs.popup.close()
+                    this.formReset()
                 } else {
                     uni.showToast({ title: graceChecker.error, icon: "none" });
                 }
             },
             // 表单取消
             formReset(e) {
+                console.log(e, '3ee')
+                this.formDetail = {
+                    radio: '', //方式
+                    input: '', //金额
+                    ramarks: '', //备注 
+                }
+                this.radioData = {
+                    radio1: false,
+                    radio2: false
+                }
+                this.getDate('end')
                 this.$refs.popup.close()
             },
             // 计算总支出金额和总收入金额
@@ -382,10 +432,12 @@
             },
             // 计算本日支出金额和本日收入金额
             todayCalculate(list, cyear, cmonth, cdate) {
+                console.log('qwwww')
                 let nowTime = this.timeList.nowtime //当前的时间
                 let newTime = `${cyear}-${cmonth}-${cdate}`
                 if (nowTime === newTime) {
                     if (list[cyear] && list[cyear][cmonth] && list[cyear][cmonth].day[cdate]) {
+                        console.log('hhhh')
                         let listData = list[cyear][cmonth].day[cdate].data //本日的数据
                         let income = list[cyear][cmonth].day[cdate].dayincome //本日收入
                         let expend = list[cyear][cmonth].day[cdate].dayexpend //本日支出
@@ -393,11 +445,14 @@
                         this.expendData = expend
                         this.nowList = listData
                     } else {
+                        console.log('llll')
+                        this.nowList = []
                         this.showDay = false
                     }
                 }
             },
             getDate(type) {
+                console.log(type, 'type')
                 const date = new Date();
                 let year = date.getFullYear();
                 let month = date.getMonth() + 1;
@@ -409,6 +464,11 @@
                 }
                 month = month > 9 ? month : '0' + month;;
                 day = day > 9 ? day : '0' + day;
+                if (type === 'end') {
+                    this.formDetail.picker = `${year}-${month}-${day}`
+                    this.date = `${year}-${month}-${day}`
+                }
+                console.log(this.formDetail, '最后一天')
                 return `${year}-${month}-${day}`;
             }
 		}

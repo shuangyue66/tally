@@ -225,6 +225,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
 var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/graceChecker.js */ 29);var _default =
 {
   components: {
@@ -236,6 +240,12 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
       format: true });
 
     return {
+      formDetail: {
+        picker: '', //时间
+        radio: '', //方式
+        input: '', //金额
+        ramarks: '' //备注 
+      },
       timeList: {
         nowtime: '', // 今天日期(年-月-日)
         cyear: '', // 年
@@ -253,7 +263,11 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
       expendData: 0, // 本日支出数据
       nowList: [], // 今天的数据
       date: currentDate,
-      showDay: true };
+      showDay: true,
+      radioData: {
+        radio1: false,
+        radio2: false } };
+
 
   },
   onLoad: function onLoad() {
@@ -331,59 +345,84 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
       this.monthCalculate(add, year, month);
     },
     onForm: function onForm(e) {
+      console.log(this.formDetail, 'formDetail');
       this.$refs.popup.open();
     },
+    // 表单时间
     bindDateChange: function bindDateChange(e) {
-      this.date = e.target.value;
+      console.log(e, 'eaeea');
+      this.date = e.detail.value;
+      this.formDetail.picker = e.detail.value;
+    },
+    // 表单方式
+    formRadio: function formRadio(e) {
+      console.log(e, 'eeeeee');
+      if (e.detail.value === 'radio1') {
+        this.radioData.radio1 = true;
+      } else {
+        this.radioData.radio2 = true;
+      }
+      this.formDetail.radio = e.detail.value;
+    },
+    // 表单金额
+    formInput: function formInput(e) {
+      console.log(e.detail.value, 'weq');
+      this.formDetail.input = e.detail.value;
+    },
+    // 表单备注
+    formRamarks: function formRamarks(e) {
+      console.log(e.detail.value, 'formRamarks');
+      this.formDetail.ramarks = e.detail.value;
     },
     // 表单确认
     formSubmit: function formSubmit(e) {
+      var formParams = _objectSpread({}, this.formDetail); // 表单参数
       var rule = [
       { name: "picker", checkType: "notnull", checkRule: "", errorMsg: "请选择日期" },
       { name: "radio", checkType: "in", checkRule: "radio1,radio2", errorMsg: "请选择方式" },
       { name: "input", checkType: "therge", errorMsg: "请输入金额" }];
 
-      var formData = e.detail.value;
-      var checkRes = graceChecker.check(formData, rule);
+      var checkRes = graceChecker.check(formParams, rule);
       if (checkRes) {
-        var time = formData.picker; // 日期
+        var time = formParams.picker; // 日期
         var cyear = time.split('-')[0]; // 年份
         var cmonth = time.split('-')[1]; // 月份
         var cdate = time.split('-')[2]; // 几号
         var list = _objectSpread({}, this.adddateList); // 总数据
 
-        var asd = formData;
+        var dataParams = {};
 
-        if (formData.radio === 'radio1') {
-          asd = _objectSpread({},
-          asd, {
-            income: Number(formData.input),
+        if (formParams.radio === 'radio1') {
+          dataParams = _objectSpread({},
+          formParams, {
+            radio: '收入',
+            income: Number(formParams.input),
             expend: 0 });
 
         } else {
-          asd = _objectSpread({},
-          asd, {
+          dataParams = _objectSpread({},
+          formParams, {
+            radio: '支出',
             income: 0,
-            expend: Number(formData.input) });
+            expend: Number(formParams.input) });
 
         }
-
         var newList = {};
         if (JSON.stringify(list) === '{}') {
           newList = _defineProperty({
-            addexpend: asd.expend, //总支出
-            addincome: asd.income },
+            addexpend: dataParams.expend, //总支出
+            addincome: dataParams.income },
           cyear, _defineProperty({
-            yearexpend: asd.expend, //年支出
-            yearincome: asd.income },
+            yearexpend: dataParams.expend, //年支出
+            yearincome: dataParams.income },
           cmonth, {
-            monthexpend: asd.expend, //月支出
-            monthincome: asd.income, //月收入
+            monthexpend: dataParams.expend, //月支出
+            monthincome: dataParams.income, //月收入
             day: _defineProperty({},
             cdate, {
-              dayexpend: asd.expend, //本日支出
-              dayincome: asd.income, //本日收入
-              data: [asd] }) }));
+              dayexpend: dataParams.expend, //本日支出
+              dayincome: dataParams.income, //本日收入
+              data: [dataParams] }) }));
 
 
 
@@ -394,72 +433,72 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
           if (list[cyear]) {
             if (list[cyear][cmonth]) {
               if (list[cyear][cmonth].day[cdate]) {
-                list.addexpend = (Number(list.addexpend) * 100 + Number(asd.expend) * 100) / 100; //总支出
-                list.addincome = (Number(list.addincome) * 100 + Number(asd.income) * 100) / 100; //总收入
-                list[cyear].yearexpend = (Number(list[cyear].yearexpend) * 100 + Number(asd.expend) * 100) / 100; //年支出
-                list[cyear].yearincome = (Number(list[cyear].yearincome) * 100 + Number(asd.income) * 100) / 100; //年收入
-                list[cyear][cmonth].monthexpend = (Number(list[cyear][cmonth].monthexpend) * 100 + Number(asd.expend) * 100) / 100; //月支出
-                list[cyear][cmonth].monthincome = (Number(list[cyear][cmonth].monthincome) * 100 + Number(asd.income) * 100) / 100; //月收入
-                list[cyear][cmonth].day[cdate].dayexpend = (Number(list[cyear][cmonth].day[cdate].dayexpend) * 100 + Number(asd.expend) * 100) / 100; //本日支出
-                list[cyear][cmonth].day[cdate].dayincome = (Number(list[cyear][cmonth].day[cdate].dayincome) * 100 + Number(asd.income) * 100) / 100; //本日收入
-                list[cyear][cmonth].day[cdate].data.push(asd);
+                list.addexpend = (Number(list.addexpend) * 100 + Number(dataParams.expend) * 100) / 100; //总支出
+                list.addincome = (Number(list.addincome) * 100 + Number(dataParams.income) * 100) / 100; //总收入
+                list[cyear].yearexpend = (Number(list[cyear].yearexpend) * 100 + Number(dataParams.expend) * 100) / 100; //年支出
+                list[cyear].yearincome = (Number(list[cyear].yearincome) * 100 + Number(dataParams.income) * 100) / 100; //年收入
+                list[cyear][cmonth].monthexpend = (Number(list[cyear][cmonth].monthexpend) * 100 + Number(dataParams.expend) * 100) / 100; //月支出
+                list[cyear][cmonth].monthincome = (Number(list[cyear][cmonth].monthincome) * 100 + Number(dataParams.income) * 100) / 100; //月收入
+                list[cyear][cmonth].day[cdate].dayexpend = (Number(list[cyear][cmonth].day[cdate].dayexpend) * 100 + Number(dataParams.expend) * 100) / 100; //本日支出
+                list[cyear][cmonth].day[cdate].dayincome = (Number(list[cyear][cmonth].day[cdate].dayincome) * 100 + Number(dataParams.income) * 100) / 100; //本日收入
+                list[cyear][cmonth].day[cdate].data.push(dataParams);
               } else {
                 newList = _defineProperty({},
                 cdate, {
-                  dayexpend: asd.expend, //本日支出
-                  dayincome: asd.income, //本日收入
-                  data: [asd] });
+                  dayexpend: dataParams.expend, //本日支出
+                  dayincome: dataParams.income, //本日收入
+                  data: [dataParams] });
 
 
                 Object.assign(list[cyear][cmonth].day, newList);
-                list.addexpend = (Number(list.addexpend) * 100 + Number(asd.expend) * 100) / 100; //总支出
-                list.addincome = (Number(list.addincome) * 100 + Number(asd.income) * 100) / 100; //总收入
-                list[cyear].yearexpend = (Number(list[cyear].yearexpend) * 100 + Number(asd.expend) * 100) / 100; //年支出
-                list[cyear].yearincome = (Number(list[cyear].yearincome) * 100 + Number(asd.income) * 100) / 100; //年收入
-                list[cyear][cmonth].monthexpend = (Number(list[cyear][cmonth].monthexpend) * 100 + Number(asd.expend) * 100) / 100; //月支出
-                list[cyear][cmonth].monthincome = (Number(list[cyear][cmonth].monthincome) * 100 + Number(asd.income) * 100) / 100; //月收入
+                list.addexpend = (Number(list.addexpend) * 100 + Number(dataParams.expend) * 100) / 100; //总支出
+                list.addincome = (Number(list.addincome) * 100 + Number(dataParams.income) * 100) / 100; //总收入
+                list[cyear].yearexpend = (Number(list[cyear].yearexpend) * 100 + Number(dataParams.expend) * 100) / 100; //年支出
+                list[cyear].yearincome = (Number(list[cyear].yearincome) * 100 + Number(dataParams.income) * 100) / 100; //年收入
+                list[cyear][cmonth].monthexpend = (Number(list[cyear][cmonth].monthexpend) * 100 + Number(dataParams.expend) * 100) / 100; //月支出
+                list[cyear][cmonth].monthincome = (Number(list[cyear][cmonth].monthincome) * 100 + Number(dataParams.income) * 100) / 100; //月收入
               }
             } else {
               newList = _defineProperty({},
               cmonth, {
-                monthexpend: asd.expend, //月支出
-                monthincome: asd.income, //月收入
+                monthexpend: dataParams.expend, //月支出
+                monthincome: dataParams.income, //月收入
                 day: _defineProperty({},
                 cdate, {
-                  dayexpend: asd.expend, //本日支出
-                  dayincome: asd.income, //本日收入
-                  data: [asd] }) });
+                  dayexpend: dataParams.expend, //本日支出
+                  dayincome: dataParams.income, //本日收入
+                  data: [dataParams] }) });
 
 
 
 
               Object.assign(list[cyear], newList);
-              list.addexpend = (Number(list.addexpend) * 100 + Number(asd.expend) * 100) / 100; //总支出
-              list.addincome = (Number(list.addincome) * 100 + Number(asd.income) * 100) / 100; //总收入
-              list[cyear].yearexpend = (Number(list[cyear].yearexpend) * 100 + Number(asd.expend) * 100) / 100; //年支出
-              list[cyear].yearincome = (Number(list[cyear].yearincome) * 100 + Number(asd.income) * 100) / 100; //年收入
+              list.addexpend = (Number(list.addexpend) * 100 + Number(dataParams.expend) * 100) / 100; //总支出
+              list.addincome = (Number(list.addincome) * 100 + Number(dataParams.income) * 100) / 100; //总收入
+              list[cyear].yearexpend = (Number(list[cyear].yearexpend) * 100 + Number(dataParams.expend) * 100) / 100; //年支出
+              list[cyear].yearincome = (Number(list[cyear].yearincome) * 100 + Number(dataParams.income) * 100) / 100; //年收入
             }
           } else {
             newList = _defineProperty({},
             cyear, _defineProperty({
-              yearexpend: asd.expend, //年支出
-              yearincome: asd.income },
+              yearexpend: dataParams.expend, //年支出
+              yearincome: dataParams.income },
             cmonth, {
-              monthexpend: asd.expend, //月支出
-              monthincome: asd.income, //月收入
+              monthexpend: dataParams.expend, //月支出
+              monthincome: dataParams.income, //月收入
               day: _defineProperty({},
               cdate, {
-                dayexpend: asd.expend, //本日支出
-                dayincome: asd.income, //本日收入
-                data: [asd] }) }));
+                dayexpend: dataParams.expend, //本日支出
+                dayincome: dataParams.income, //本日收入
+                data: [dataParams] }) }));
 
 
 
 
 
             Object.assign(list, newList);
-            list.addexpend = (Number(list.addexpend) * 100 + Number(asd.expend) * 100) / 100, //总支出
-            list.addincome = (Number(list.addincome) * 100 + Number(asd.income) * 100) / 100; //总收入
+            list.addexpend = (Number(list.addexpend) * 100 + Number(dataParams.expend) * 100) / 100, //总支出
+            list.addincome = (Number(list.addincome) * 100 + Number(dataParams.income) * 100) / 100; //总收入
           }
         }
 
@@ -469,13 +508,24 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
         this.todayCalculate(list, cyear, cmonth, cdate); // 计算本日金额
         uni.setStorageSync('list', list);
         uni.showToast({ title: "验证通过!", icon: "none" });
-        this.$refs.popup.close();
+        this.formReset();
       } else {
         uni.showToast({ title: graceChecker.error, icon: "none" });
       }
     },
     // 表单取消
     formReset: function formReset(e) {
+      console.log(e, '3ee');
+      this.formDetail = {
+        radio: '', //方式
+        input: '', //金额
+        ramarks: '' //备注 
+      };
+      this.radioData = {
+        radio1: false,
+        radio2: false };
+
+      this.getDate('end');
       this.$refs.popup.close();
     },
     // 计算总支出金额和总收入金额
@@ -506,10 +556,12 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
     },
     // 计算本日支出金额和本日收入金额
     todayCalculate: function todayCalculate(list, cyear, cmonth, cdate) {
+      console.log('qwwww');
       var nowTime = this.timeList.nowtime; //当前的时间
       var newTime = "".concat(cyear, "-").concat(cmonth, "-").concat(cdate);
       if (nowTime === newTime) {
         if (list[cyear] && list[cyear][cmonth] && list[cyear][cmonth].day[cdate]) {
+          console.log('hhhh');
           var listData = list[cyear][cmonth].day[cdate].data; //本日的数据
           var income = list[cyear][cmonth].day[cdate].dayincome; //本日收入
           var expend = list[cyear][cmonth].day[cdate].dayexpend; //本日支出
@@ -517,11 +569,14 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
           this.expendData = expend;
           this.nowList = listData;
         } else {
+          console.log('llll');
+          this.nowList = [];
           this.showDay = false;
         }
       }
     },
     getDate: function getDate(type) {
+      console.log(type, 'type');
       var date = new Date();
       var year = date.getFullYear();
       var month = date.getMonth() + 1;
@@ -533,6 +588,11 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
       }
       month = month > 9 ? month : '0' + month;;
       day = day > 9 ? day : '0' + day;
+      if (type === 'end') {
+        this.formDetail.picker = "".concat(year, "-").concat(month, "-").concat(day);
+        this.date = "".concat(year, "-").concat(month, "-").concat(day);
+      }
+      console.log(this.formDetail, '最后一天');
       return "".concat(year, "-").concat(month, "-").concat(day);
     } } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
