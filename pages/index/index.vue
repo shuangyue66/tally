@@ -19,11 +19,11 @@
 		</view>
 		<view class="text-area">
 			<view @click="onlucky">
-				<icon type="success" size="40"/>
+				<image class="accounts-img" src="../../static/img5.png" />
 				<view>点饭</view>
 			</view>
 			<view @click="onAccounts">
-				<icon type="info" size="40"/>
+				<image class="accounts-img" src="../../static/img4.jpg" />
 				<view>记账</view>
 			</view>
 		</view>
@@ -42,7 +42,14 @@
 		},
 		methods: {
 			onlucky(e) {
-				console.log(2)
+				wx.navigateToMiniProgram({
+					appId: 'wx055fd9c35ed854c5',// 要跳转的小程序的appid
+					path: 'pages/v3/v3',// 跳转的目标页面
+					envVersion: 'release',
+					success(res) {
+					// 打开成功
+					}
+				})
 			},
 			onAccounts(e) {
 				uni.navigateTo({
@@ -76,8 +83,9 @@
 	}
 
 	.text-area {
-		width: 600rpx;
+		width: 400rpx;
 		margin: 30rpx 0;
+		font-size: 28rpx;
 		display: flex;
 		text-align: center;
 		justify-content: space-between;
@@ -86,5 +94,11 @@
 	.title {
 		font-size: 36rpx;
 		color: #8f8f94;
+	}
+
+	.accounts-img {
+		width: 140rpx;
+		height: 140rpx;
+		border-radius: 50%;
 	}
 </style>

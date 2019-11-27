@@ -1,14 +1,33 @@
 <template>
 	<view class="content">
         <view class="contentHead">
-            <view class="contentHead-v">
-                <view>总收入￥: {{addIncomeData}}</view>
-                <view style="color: #red;">总支出￥: {{addExpendData}}</view>
-                <view>总余额￥: {{addBalanceData}}</view>
-            </view>
-            <view class="contentHead-v">
-                <view>月收入￥: {{monthIncomeData}}</view>
-                <view>月支出￥: {{monthExpendData}}</view>
+            <view class="contentHead-box">
+                <view class="contentHead-v">
+                    <view>
+                        <view class="head-prefix">总收入￥</view>
+                        <view>{{addIncomeData}}</view>
+                    </view>
+                    <view style="margin-top: 10rpx;">
+                        <view class="head-prefix">月收入￥</view>
+                        <view>{{monthIncomeData}}</view>
+                    </view>
+                </view>
+                <view class="contentHead-v">
+                    <view>
+                        <view class="head-prefix">总支出￥</view>
+                        <view v-if="addExpendData == 0">{{addExpendData}}</view>
+                        <view v-else class="head-prefix-r">{{'-'+ addExpendData}}</view>
+                    </view>
+                    <view style="margin-top: 10rpx;">
+                        <view class="head-prefix">月支出￥</view>
+                        <view v-if="monthExpendData == 0">{{monthExpendData}}</view>
+                        <view v-else class="head-prefix-r">{{'-'+monthExpendData}}</view>
+                    </view>
+                </view>
+                <view class="contentHead-v">
+                    <view class="head-prefix">总余额￥</view>
+                    <view>{{addBalanceData}}</view>
+                </view>
             </view>
         </view>
 		<uni-calendar 
@@ -21,23 +40,45 @@
         />
         <view v-if="showDay">
             <view class="todayView">
-                <view class="todayView-v" >本日总收￥: {{ incomeData }}</view>
-                <view class="todayView-v">本日总支出￥: {{ '-' + expendData }}</view>
+                <view class="todayView-l">
+                    <view v-if="incomeData == 0" class="todayView-v">本日收入￥{{ incomeData }}</view>
+                    <view v-else class="todayView-v" >
+                        本日收入￥
+                        <text class="greenStyle">{{ '+' +incomeData }}</text>
+                    </view>
+                    <view v-if="expendData == 0"
+                        class="todayView-v">本日支出￥{{ expendData }}</view>
+                    <view v-else class="todayView-v">
+                        本日支出￥
+                        <text class="todayView-v-prefix">{{'-'+ expendData }}</text>
+                    </view>
+                </view>
+                <view class="todayView-r">
+                    <button @click="onForm" type="primary" plain="true">添加</button>
+                </view>
             </view>
             <view class="inventoryBox"
                     v-for="(item, index) in nowList"
                     :key="index">
-                    <view class="inventoryBox-l">
-                        <view>{{ item.picker }}</view>
-                        <view>{{ item.radio }}</view>
-                        <view>{{ item.input }}</view>
-                    </view>
-                    <view class="inventoryBox-r">
-                        <view>{{ item.ramarks }}</view>
+                    <view class="inventoryBox-content">
+                        <view class="inventoryBox-l">
+                            <view class="inventoryItem">{{ item.picker }}</view>
+                            <view class="inventoryItem">{{ item.radio }}</view>
+                            <view v-if="item.radio === '收入'"
+                                class="greenStyle inventoryItem">{{ '+'+ item.input }}</view>
+                            <view v-else class="redStyle inventoryItem">{{ '-' + item.input }}</view>
+                        </view>
+                        <view class="inventoryBox-z"></view>
+                        <view class="inventoryBox-r">
+                            <view v-if="item.ramarks">备注:{{ item.ramarks }}</view>
+                            <view v-else></view>
+                        </view>
                     </view>
             </view>
         </view>
-        <button @click="onForm">哈哈哈哈</button>
+        <view v-else class="brnStyle">
+            <button class="brnStyle-b" @click="onForm">添加</button>
+        </view>
         <view>
             <uni-popup 
                 ref="popup" 
@@ -72,15 +113,17 @@
                     <view class="formView">
                         <text class="formView-t">金额:</text>
                         <input type="digit"
+                                class="formView-input"
                                 :value="formDetail.input"
                                 @input="formInput"
+                                maxlength='12'
                                 placeholder="请输入金额，小数点最多两位" />
                     </view>
                     <view class="formView">
                         <view class="formView-t">备注:</view>
                         <textarea :value="formDetail.ramarks" 
                                 @input="formRamarks"
-                                style="height: 200rpx; background: #FAFAFA;"
+                                class="formView-text"
                                 placeholder="请输入备注"
                                 maxlength="100"
                                 />
@@ -139,7 +182,7 @@
                 expendData: 0, // 本日支出数据
                 nowList: [], // 今天的数据
                 date: currentDate,
-                showDay: true,
+                showDay: false,
                 radioData: {
                     radio1: false,
                     radio2: false
@@ -163,6 +206,8 @@
                 ...newtime
             }
             if (newList) {
+                console.log('1')
+                this.showDay = true
                 this.addDateList = newList
                 this.addCalculate(newList) //总数据
                 this.monthCalculate(newList, Y, M) //月数据
@@ -207,8 +252,10 @@
                     month = `0${month}`
                 }
                 let YM = `${year}-${month}`
+                let add = this.addDateList
                 if (YM === this.YMtime) {
-                    this.showDay = true
+                    // this.showDay = true
+                    this.todayCalculate(add, year, month, this.timeList.cdate)
                 } else {
                     this.showDay = false
                 }
@@ -217,22 +264,18 @@
                     cyear: year,
                     cmonth: month
                 }
-                let add = this.addDateList
                 this.monthCalculate(add, year, month)
             },
             onForm(e) {
-                console.log(this.formDetail, 'formDetail')
                 this.$refs.popup.open()
             },
             // 表单时间
             bindDateChange: function(e) {
-                console.log(e, 'eaeea')
                 this.date = e.detail.value
                 this.formDetail.picker = e.detail.value
             },
             // 表单方式
             formRadio(e) {
-                console.log(e, 'eeeeee')
                 if (e.detail.value === 'radio1') {
                     this.radioData.radio1 = true
                 } else {
@@ -242,12 +285,10 @@
             },
             // 表单金额
             formInput(e) {
-                console.log(e.detail.value, 'weq')
                 this.formDetail.input = e.detail.value
             },
             // 表单备注
             formRamarks(e) {
-                console.log(e.detail.value, 'formRamarks')
                 this.formDetail.ramarks = e.detail.value
             },
             // 表单确认
@@ -391,7 +432,6 @@
             },
             // 表单取消
             formReset(e) {
-                console.log(e, '3ee')
                 this.formDetail = {
                     radio: '', //方式
                     input: '', //金额
@@ -420,8 +460,8 @@
                 if (nowmonth == Number(cmonth) && nowyear == Number(cyear)) {
                     if (list[cyear] && list[cyear][cmonth]) {
                         let monthlistData = list[cyear][cmonth] //月的数据
-                        let monthIncome = list[cyear][cmonth].monthincome //月收入
-                        let monthExpend = list[cyear][cmonth].monthexpend //月支出
+                        let monthIncome = list[cyear][cmonth].monthIncome//月收入
+                        let monthExpend = list[cyear][cmonth].monthExpend //月支出
                         this.monthIncomeData = monthIncome //月收入
                         this.monthExpendData = monthExpend //月支出
                     } else {
@@ -432,27 +472,24 @@
             },
             // 计算本日支出金额和本日收入金额
             todayCalculate(list, cyear, cmonth, cdate) {
-                console.log('qwwww')
                 let nowTime = this.timeList.nowtime //当前的时间
                 let newTime = `${cyear}-${cmonth}-${cdate}`
                 if (nowTime === newTime) {
                     if (list[cyear] && list[cyear][cmonth] && list[cyear][cmonth].day[cdate]) {
-                        console.log('hhhh')
                         let listData = list[cyear][cmonth].day[cdate].data //本日的数据
                         let income = list[cyear][cmonth].day[cdate].dayIncome //本日收入
                         let expend = list[cyear][cmonth].day[cdate].dayExpend //本日支出
                         this.incomeData = income
                         this.expendData = expend
                         this.nowList = listData
+                        this.showDay = true
                     } else {
-                        console.log('llll')
                         this.nowList = []
                         this.showDay = false
                     }
                 }
             },
             getDate(type) {
-                console.log(type, 'type')
                 const date = new Date();
                 let year = date.getFullYear();
                 let month = date.getMonth() + 1;
@@ -468,10 +505,9 @@
                     this.formDetail.picker = `${year}-${month}-${day}`
                     this.date = `${year}-${month}-${day}`
                 }
-                console.log(this.formDetail, '最后一天')
                 return `${year}-${month}-${day}`;
             }
-		}
+        }
 	}
 </script>
 
@@ -482,38 +518,74 @@
 		align-items: center;
 		justify-content: center;
 	}
-
+    
     .contentHead {
+        width: 750rpx;
+        background: #5CACEE;
+        color: #fff;
+    }
+
+    .contentHead-box {
         display: flex;
-        width: 700rpx;
-        margin-top: 10rpx;
+        margin: 20rpx;
     }
 
     .contentHead-v {
         width: 45%;
         text-align: left;
         margin-left: 10rpx;
+        font-size: 30rpx;
+        /* color: #fff; */
     }
-    
+
+    .head-prefix {
+        margin-bottom: 10rpx;
+        color: #F7F7F7;
+        opacity: 0.7;
+        font-size: 32rpx;
+    }
+
+    .head-prefix-r {
+        color: #F4A460;
+    }
+
     .todayView {
         display: flex;
-        width: 700rpx;
-        margin: 20rpx 0;
-        height: 60rpx;
-        background: #F7F7F7;
+        justify-content: space-between;
+        align-items: center;
+        width: 750rpx;
+        margin: 10rpx 0;
+        text-align: left;
+        background: #D6D6D6;
+        color: #F7F7F7;
+    }
+
+    .todayView-l{
+        margin: 20rpx 20rpx;
     }
 
     .todayView-v {
-        width: 45%;
         text-align: left;
-        margin-left: 0rpx;
+        font-size: 32rpx;
+        margin: 10rpx 0;
+    }
+
+    .todayView-v-prefix {
+        color: red;
+    }
+
+    .todayView-r {
+        margin-right: 30rpx;
     }
 
     .inventoryBox {
-        display: flex;
         width: 100%;
+    }
+
+    .inventoryBox-content {
+        display: flex;
         border-bottom: 1px solid #EEE9E9;
-        margin: 10rpx 0;
+        margin: 20rpx;
     }
 
     .inventoryBox-l {
@@ -521,23 +593,68 @@
         margin-right: 10rpx;
     }
 
+    .inventoryBox-z{
+        width: 1px;
+        background-color: #EEE9E9;
+        margin: 20rpx 0;
+    }
+
+    .inventoryBox-r {
+        font-size: 30rpx;
+        padding-left: 20rpx;
+    }
+
+    .inventoryItem {
+        margin-bottom: 10rpx;
+        font-size: 30rpx;
+    }
+
+    .greenStyle{
+        color: green;
+    }
+
+    .redStyle{
+        color: red;
+    }
+
+    .brnStyle {
+        margin: 60rpx 20rpx;
+        width: 100%;
+    }
+
+    .brnStyle-b {
+        width: 50%;
+        background: #5CACEE;
+        color: #fff;
+    }
+
     .formBox {
         background: #fff;
         width: 600rpx;
-        /* height: 700rpx; */
         border-radius: 36rpx;
-        padding: 20rpx;
+        padding: 40rpx;
     }
 
     .formView {
-        margin: 10rpx 0;
+        margin: 20rpx 0;
         /* border: */
     }
 
     .formView-t {
-        margin-bottom: 10rpx;
+        margin-bottom: 20rpx;
+        color: #CD9B9B;
     }
 
+    .formView-input{
+        width: 100%;
+    }
+
+    .formView-text {
+        width: 100%;
+        height: 200rpx;
+        line-height: 200rpx;
+        background: #FAFAFA;
+    }
     .formBrn {
         display: flex;
         justify-content: space-around;

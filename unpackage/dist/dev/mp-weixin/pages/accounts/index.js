@@ -229,6 +229,49 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/graceChecker.js */ 29);var _default =
 {
   components: {
@@ -263,7 +306,7 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
       expendData: 0, // 本日支出数据
       nowList: [], // 今天的数据
       date: currentDate,
-      showDay: true,
+      showDay: false,
       radioData: {
         radio1: false,
         radio2: false } };
@@ -287,6 +330,8 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
     newtime);
 
     if (newList) {
+      console.log('1');
+      this.showDay = true;
       this.addDateList = newList;
       this.addCalculate(newList); //总数据
       this.monthCalculate(newList, Y, M); //月数据
@@ -331,8 +376,10 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
         month = "0".concat(month);
       }
       var YM = "".concat(year, "-").concat(month);
+      var add = this.addDateList;
       if (YM === this.YMtime) {
-        this.showDay = true;
+        // this.showDay = true
+        this.todayCalculate(add, year, month, this.timeList.cdate);
       } else {
         this.showDay = false;
       }
@@ -341,22 +388,18 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
         cyear: year,
         cmonth: month });
 
-      var add = this.addDateList;
       this.monthCalculate(add, year, month);
     },
     onForm: function onForm(e) {
-      console.log(this.formDetail, 'formDetail');
       this.$refs.popup.open();
     },
     // 表单时间
     bindDateChange: function bindDateChange(e) {
-      console.log(e, 'eaeea');
       this.date = e.detail.value;
       this.formDetail.picker = e.detail.value;
     },
     // 表单方式
     formRadio: function formRadio(e) {
-      console.log(e, 'eeeeee');
       if (e.detail.value === 'radio1') {
         this.radioData.radio1 = true;
       } else {
@@ -366,12 +409,10 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
     },
     // 表单金额
     formInput: function formInput(e) {
-      console.log(e.detail.value, 'weq');
       this.formDetail.input = e.detail.value;
     },
     // 表单备注
     formRamarks: function formRamarks(e) {
-      console.log(e.detail.value, 'formRamarks');
       this.formDetail.ramarks = e.detail.value;
     },
     // 表单确认
@@ -515,7 +556,6 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
     },
     // 表单取消
     formReset: function formReset(e) {
-      console.log(e, '3ee');
       this.formDetail = {
         radio: '', //方式
         input: '', //金额
@@ -544,8 +584,8 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
       if (nowmonth == Number(cmonth) && nowyear == Number(cyear)) {
         if (list[cyear] && list[cyear][cmonth]) {
           var monthlistData = list[cyear][cmonth]; //月的数据
-          var monthIncome = list[cyear][cmonth].monthincome; //月收入
-          var monthExpend = list[cyear][cmonth].monthexpend; //月支出
+          var monthIncome = list[cyear][cmonth].monthIncome; //月收入
+          var monthExpend = list[cyear][cmonth].monthExpend; //月支出
           this.monthIncomeData = monthIncome; //月收入
           this.monthExpendData = monthExpend; //月支出
         } else {
@@ -556,27 +596,24 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
     },
     // 计算本日支出金额和本日收入金额
     todayCalculate: function todayCalculate(list, cyear, cmonth, cdate) {
-      console.log('qwwww');
       var nowTime = this.timeList.nowtime; //当前的时间
       var newTime = "".concat(cyear, "-").concat(cmonth, "-").concat(cdate);
       if (nowTime === newTime) {
         if (list[cyear] && list[cyear][cmonth] && list[cyear][cmonth].day[cdate]) {
-          console.log('hhhh');
           var listData = list[cyear][cmonth].day[cdate].data; //本日的数据
           var income = list[cyear][cmonth].day[cdate].dayIncome; //本日收入
           var expend = list[cyear][cmonth].day[cdate].dayExpend; //本日支出
           this.incomeData = income;
           this.expendData = expend;
           this.nowList = listData;
+          this.showDay = true;
         } else {
-          console.log('llll');
           this.nowList = [];
           this.showDay = false;
         }
       }
     },
     getDate: function getDate(type) {
-      console.log(type, 'type');
       var date = new Date();
       var year = date.getFullYear();
       var month = date.getMonth() + 1;
@@ -592,7 +629,6 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
         this.formDetail.picker = "".concat(year, "-").concat(month, "-").concat(day);
         this.date = "".concat(year, "-").concat(month, "-").concat(day);
       }
-      console.log(this.formDetail, '最后一天');
       return "".concat(year, "-").concat(month, "-").concat(day);
     } } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))

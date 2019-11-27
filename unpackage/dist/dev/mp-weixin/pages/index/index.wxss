@@ -30,8 +30,9 @@
 	height: 400rpx;
 }
 .text-area {
-	width: 600rpx;
+	width: 400rpx;
 	margin: 30rpx 0;
+	font-size: 28rpx;
 	display: -webkit-box;
 	display: -webkit-flex;
 	display: -ms-flexbox;
@@ -45,5 +46,10 @@
 .title {
 	font-size: 36rpx;
 	color: #8f8f94;
+}
+.accounts-img {
+	width: 140rpx;
+	height: 140rpx;
+	border-radius: 50%;
 }
 

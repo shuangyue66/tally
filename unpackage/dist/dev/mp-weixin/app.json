@@ -6,7 +6,7 @@
   "subPackages": [],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "isshiki工具",
+    "navigationBarTitleText": "Isshiki帐篷",
     "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8"
   },
@@ -16,5 +16,5 @@
     }
   },
   "usingComponents": {},
-  "sitemapLocation": "sitemap71.json"
+  "sitemapLocation": "sitemap44.json"
 }

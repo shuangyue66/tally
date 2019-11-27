@@ -175,7 +175,14 @@ var _default =
   },
   methods: {
     onlucky: function onlucky(e) {
-      console.log(2);
+      wx.navigateToMiniProgram({
+        appId: 'wx055fd9c35ed854c5', // 要跳转的小程序的appid
+        path: 'pages/v3/v3', // 跳转的目标页面
+        envVersion: 'release',
+        success: function success(res) {
+          // 打开成功
+        } });
+
     },
     onAccounts: function onAccounts(e) {
       uni.navigateTo({
