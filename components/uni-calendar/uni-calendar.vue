@@ -21,9 +21,9 @@
 				<text class="uni-calendar__backtoday" @click="backtoday">回到今天</text>
 			</view>
 			<view class="uni-calendar__box">
-				<view class="uni-calendar__box-bg">
+				<!-- <view class="uni-calendar__box-bg">
 					<text class="uni-calendar__box-bg-text">{{nowDate.month}}</text>
-				</view>
+				</view> -->
 				<view class="uni-calendar__weeks" v-for="(item,weekIndex) in weeks" :key="weekIndex">
 					<view class="uni-calendar__weeks-item" v-for="(weeks,weeksIndex) in item" :key="weeksIndex">
 						<uni-calendar-item :weeks="weeks" :calendar="calendar" :selected="selected" :lunar="lunar" @change="choiceDate"></uni-calendar-item>

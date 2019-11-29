@@ -30,6 +30,7 @@
                 </view>
             </view>
         </view>
+        <view>
 		<uni-calendar 
             :insert="true"
             :lunar="true" 
@@ -38,6 +39,7 @@
             @change="change"
             @month-switch="monthSwitch"
         />
+        </view>
         <view v-if="showDay">
             <view class="todayView">
                 <view class="todayView-l">
@@ -86,7 +88,7 @@
                 :maskClick="false">
                 <view class="formBox">
                     <view>
-                        <text class="formView-t">时间:</text>
+                        <view class="formView-t">时间:</view>
                         <view>
                             <picker mode="date"
                                     :value="formDetail.picker"
@@ -98,20 +100,20 @@
                         </view>
                     </view>
                     <view class="formView">
-                        <text class="formView-t">方式:</text>
+                        <view class="formView-t">方式:</view>
                         <radio-group @change="formRadio"
                                     :value="formDetail.radio"
                                     >
                             <label>
                                 <radio value="radio1" :checked="radioData.radio1"/><text>收入</text>
                             </label>
-                            <label>
+                            <label style="margin-left: 20rpx;">
                                 <radio value="radio2" :checked="radioData.radio2"/><text>支出</text>
                             </label>
                         </radio-group>
                     </view>
                     <view class="formView">
-                        <text class="formView-t">金额:</text>
+                        <view class="formView-t">金额:</view>
                         <input type="digit"
                                 class="formView-input"
                                 :value="formDetail.input"
@@ -236,6 +238,8 @@
                     cdate: e.date
                 }
                 let YM = `${e.year}-${e.month}`
+                this.date = `${e.year}-${e.month}-${e.date}`
+                this.formDetail.picker = `${e.year}-${e.month}-${e.date}`
                 this.YMtime = YM 
                 this.showDay = true
                 this.timeList = {
@@ -501,10 +505,10 @@
                 }
                 month = month > 9 ? month : '0' + month;;
                 day = day > 9 ? day : '0' + day;
-                if (type === 'end') {
-                    this.formDetail.picker = `${year}-${month}-${day}`
-                    this.date = `${year}-${month}-${day}`
-                }
+                // if (type === 'end') {
+                //     this.formDetail.picker = `${year}-${month}-${day}`
+                //     this.date = `${year}-${month}-${day}`
+                // }
                 return `${year}-${month}-${day}`;
             }
         }
@@ -535,18 +539,17 @@
         text-align: left;
         margin-left: 10rpx;
         font-size: 30rpx;
-        /* color: #fff; */
     }
 
     .head-prefix {
         margin-bottom: 10rpx;
-        color: #F7F7F7;
-        opacity: 0.7;
-        font-size: 32rpx;
+        color: #DEDEDE;
+        opacity: 0.8;
+        font-size: 36rpx;
     }
 
     .head-prefix-r {
-        color: #F4A460;
+        color: #EEEE00;
     }
 
     .todayView {
@@ -556,8 +559,8 @@
         width: 750rpx;
         margin: 10rpx 0;
         text-align: left;
-        background: #D6D6D6;
-        color: #F7F7F7;
+        background: #F7F7F7;
+        color: #8B8386;
     }
 
     .todayView-l{
@@ -652,16 +655,16 @@
     .formView-text {
         width: 100%;
         height: 200rpx;
-        line-height: 200rpx;
         background: #FAFAFA;
     }
     .formBrn {
         display: flex;
         justify-content: space-around;
-        margin: 20rpx;
+        margin: 20rpx 20rpx 0;
     }
 
     .brn {
         width: 45%;
     }
+
 </style>

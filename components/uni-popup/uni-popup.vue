@@ -1,7 +1,7 @@
 <template>
 	<view v-if="showPopup" class="uni-popup" @touchmove.stop.prevent="clear">
-		<uni-transition :mode-class="['fade']" :styles="maskClass" :show="showTrans" @click="onTap" />
-		<uni-transition :mode-class="ani" :styles="transClass" :show="showTrans" @click="onTap">
+		<uni-transition :styles="maskClass" :show="showTrans" @click="onTap" />
+		<uni-transition :styles="transClass" :show="showTrans" @click="onTap">
 			<view class="uni-popup__wrapper-box" @click.stop="clear">
 				<slot />
 			</view>

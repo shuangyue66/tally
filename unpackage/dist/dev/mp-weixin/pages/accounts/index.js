@@ -272,6 +272,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/graceChecker.js */ 29);var _default =
 {
   components: {
@@ -360,6 +362,8 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
         cdate: e.date };
 
       var YM = "".concat(e.year, "-").concat(e.month);
+      this.date = "".concat(e.year, "-").concat(e.month, "-").concat(e.date);
+      this.formDetail.picker = "".concat(e.year, "-").concat(e.month, "-").concat(e.date);
       this.YMtime = YM;
       this.showDay = true;
       this.timeList = _objectSpread({},
@@ -625,10 +629,10 @@ var graceChecker = __webpack_require__(/*! ../../js_sdk/graceui-dataChecker/grac
       }
       month = month > 9 ? month : '0' + month;;
       day = day > 9 ? day : '0' + day;
-      if (type === 'end') {
-        this.formDetail.picker = "".concat(year, "-").concat(month, "-").concat(day);
-        this.date = "".concat(year, "-").concat(month, "-").concat(day);
-      }
+      // if (type === 'end') {
+      //     this.formDetail.picker = `${year}-${month}-${day}`
+      //     this.date = `${year}-${month}-${day}`
+      // }
       return "".concat(year, "-").concat(month, "-").concat(day);
     } } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
