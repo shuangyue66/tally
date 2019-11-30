@@ -203,12 +203,12 @@
                 cmonth: M,
                 cdate: D
             }
+            this.formDetail.picker = `${Y}-${M}-${D}`
             this.YMtime = `${Y}-${M}`
             this.timeList = {
                 ...newtime
             }
             if (newList) {
-                console.log('1')
                 this.showDay = true
                 this.addDateList = newList
                 this.addCalculate(newList) //总数据
@@ -437,6 +437,7 @@
             // 表单取消
             formReset(e) {
                 this.formDetail = {
+                    ...this.formDetail,
                     radio: '', //方式
                     input: '', //金额
                     ramarks: '', //备注 
